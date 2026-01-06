@@ -9,10 +9,10 @@
 // --- SPEED CONFIGURATION (ESCs) ---
 // 90 is neutral. Range is usually 0-180.
 const int SPEED_STOP = 90;
-const int SPEED_FWD_SLOW = 105;
-const int SPEED_BACK_SLOW = 75;
-const int SPEED_TURN_FWD = 110;
-const int SPEED_TURN_BACK = 70;
+const int SPEED_FWD_SLOW = 65;
+const int SPEED_BACK_SLOW = 115;
+const int SPEED_TURN_FWD = 120;
+const int SPEED_TURN_BACK = 60;
 
 // --- SAFETY CONFIGURATION ---
 const int SAFE_DISTANCE_CM = 20;
