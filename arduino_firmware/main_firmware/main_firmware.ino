@@ -1,72 +1,79 @@
 /**
- * AGRI-Scout Firmware v2.0
- * Authors: Pedro Alves & Luiz Felipe
- * * Description: 
- * Controls DC motors via Serial commands and handles obstacle avoidance
- * using 3 Ultrasonic Sensors (Left, Rear, Right).
+ * AGRI-Scout Firmware v4.1 (English Standard)
+ * Hardware: Arduino UNO + ESCs + 3 Ultrasonic Sensors
+ * Logic: Smart Directional Blocking (Safety Shield)
  */
 
-// --- CONFIGURATION ---
-const int SAFE_DISTANCE_CM = 20; // Minimum distance to allow movement
+#include <Servo.h>
 
-// --- PIN DEFINITIONS ---
-// Ultrasonic Sensors
-const int TRIG_LEFT = 2;
-const int ECHO_LEFT = 3;
+// --- SPEED CONFIGURATION (ESCs) ---
+// 90 is neutral. Range is usually 0-180.
+const int SPEED_STOP = 90;
+const int SPEED_FWD_SLOW = 105;
+const int SPEED_BACK_SLOW = 75;
+const int SPEED_TURN_FWD = 110;
+const int SPEED_TURN_BACK = 70;
 
-const int TRIG_REAR = 4;
-const int ECHO_REAR = 5;
+// --- SAFETY CONFIGURATION ---
+const int SAFE_DISTANCE_CM = 20;
 
-const int TRIG_RIGHT = 6;
-const int ECHO_RIGHT = 7;
+// --- PIN DEFINITIONS (No conflicts with Motors) ---
+// Motors (Must be PWM pins)
+const int PIN_ESC_LEFT = 5;
+const int PIN_ESC_RIGHT = 9;
 
-// Motors (Check your driver wiring)
-// Motor A (Left)
-const int IN1 = 5;
-const int IN2 = 6;
-// Motor B (Right)
-const int IN3 = 9;
-const int IN4 = 10;
+// Sensors (Trigger / Echo)
+const int TRIG_LEFT = 2;  const int ECHO_LEFT = 3;
+const int TRIG_REAR = 4;  const int ECHO_REAR = 7;
+const int TRIG_RIGHT = 8; const int ECHO_RIGHT = 11;
+
+// Objects
+Servo escLeft;
+Servo escRight;
 
 void setup() {
-  // Initialize Serial Communication with Raspberry Pi
   Serial.begin(9600);
 
-  // Initialize Motor Pins
-  pinMode(IN1, OUTPUT); pinMode(IN2, OUTPUT);
-  pinMode(IN3, OUTPUT); pinMode(IN4, OUTPUT);
-
-  // Initialize Sensor Pins
+  // 1. Setup Sensors
   pinMode(TRIG_LEFT, OUTPUT); pinMode(ECHO_LEFT, INPUT);
   pinMode(TRIG_REAR, OUTPUT); pinMode(ECHO_REAR, INPUT);
   pinMode(TRIG_RIGHT, OUTPUT); pinMode(ECHO_RIGHT, INPUT);
 
-  stopMotors(); // Safety first
-  Serial.println("Arduino Ready. Safety System Active.");
+  // 2. Setup Motors
+  Serial.println("SYSTEM: Initializing ESCs...");
+  escLeft.attach(PIN_ESC_LEFT);
+  escRight.attach(PIN_ESC_RIGHT);
+  
+  // 3. Arming Sequence (Neutral Signal)
+  stopMotors(); 
+  delay(3000); // Wait 3s for ESCs to recognize neutral and stop beeping
+  
+  Serial.println("SYSTEM: Ready. 360 Shield Active.");
 }
 
 void loop() {
-  // Check for incoming commands from Raspberry Pi
   if (Serial.available() > 0) {
-    char command = Serial.read();
-    handleCommand(command);
+    char cmd = Serial.read();
+    executeCommand(cmd);
   }
 }
 
-// --- COMMAND HANDLER ---
-void handleCommand(char cmd) {
-  // We check sensors BEFORE moving. This creates a "Reflex".
+// --- COMMAND LOGIC WITH PROTECTION ---
+void executeCommand(char cmd) {
   
+  // Read sensors BEFORE making a decision
+  int distLeft = readDistance(TRIG_LEFT, ECHO_LEFT);
+  int distRear = readDistance(TRIG_REAR, ECHO_REAR);
+  int distRight = readDistance(TRIG_RIGHT, ECHO_RIGHT);
+
   switch (cmd) {
-    case 'F': // Forward
-      // Usually we have a camera in front, so we trust the Pi.
-      // But if you add a Front Sensor, check it here.
+    case 'F': // Forward (We trust the user/camera, but could add Front Sensor here)
       moveForward();
       Serial.println("MOVING_FWD");
       break;
 
-    case 'B': // Backward
-      if (getDistance(TRIG_REAR, ECHO_REAR) > SAFE_DISTANCE_CM) {
+    case 'B': // Backward (Check REAR Sensor)
+      if (distRear > SAFE_DISTANCE_CM) {
         moveBackward();
         Serial.println("MOVING_BACK");
       } else {
@@ -75,9 +82,8 @@ void handleCommand(char cmd) {
       }
       break;
 
-    case 'L': // Left Turn
-      // Check Left Sensor before turning
-      if (getDistance(TRIG_LEFT, ECHO_LEFT) > SAFE_DISTANCE_CM) {
+    case 'L': // Turn Left (Check LEFT Sensor)
+      if (distLeft > SAFE_DISTANCE_CM) {
         turnLeft();
         Serial.println("TURNING_LEFT");
       } else {
@@ -86,9 +92,8 @@ void handleCommand(char cmd) {
       }
       break;
 
-    case 'R': // Right Turn
-      // Check Right Sensor before turning
-      if (getDistance(TRIG_RIGHT, ECHO_RIGHT) > SAFE_DISTANCE_CM) {
+    case 'R': // Turn Right (Check RIGHT Sensor)
+      if (distRight > SAFE_DISTANCE_CM) {
         turnRight();
         Serial.println("TURNING_RIGHT");
       } else {
@@ -103,64 +108,54 @@ void handleCommand(char cmd) {
       Serial.println("STOPPED");
       break;
       
-    case 'T': // Test Sensors (Telemetry Request)
-      sendTelemetry();
+    case 'T': // Telemetry (Send data from all 3 sensors)
+      Serial.print("DATA|Left:");
+      Serial.print(distLeft);
+      Serial.print("|Rear:");
+      Serial.print(distRear);
+      Serial.print("|Right:");
+      Serial.println(distRight);
       break;
   }
 }
 
-// --- SENSOR HELPER ---
-int getDistance(int trigPin, int echoPin) {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  long duration = pulseIn(echoPin, HIGH, 30000); // 30ms timeout (approx 5 meters)
-  
-  if (duration == 0) return 999; // No echo = clear path (or error)
-  
-  return duration * 0.034 / 2; // Convert to cm
-}
-
-void sendTelemetry() {
-  int dLeft = getDistance(TRIG_LEFT, ECHO_LEFT);
-  delay(5);
-  int dRear = getDistance(TRIG_REAR, ECHO_REAR);
-  delay(5);
-  int dRight = getDistance(TRIG_RIGHT, ECHO_RIGHT);
-
-  Serial.print("DATA|L:");
-  Serial.print(dLeft);
-  Serial.print("|R:");
-  Serial.print(dRear);
-  Serial.print("|R:");
-  Serial.println(dRight);
-}
-
-// --- MOTOR FUNCTIONS ---
+// --- MOVEMENT FUNCTIONS ---
 void moveForward() {
-  digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
-  digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+  escLeft.write(SPEED_FWD_SLOW);
+  escRight.write(SPEED_FWD_SLOW);
 }
 
 void moveBackward() {
-  digitalWrite(IN1, LOW); digitalWrite(IN2, HIGH);
-  digitalWrite(IN3, LOW); digitalWrite(IN4, HIGH);
+  escLeft.write(SPEED_BACK_SLOW);
+  escRight.write(SPEED_BACK_SLOW);
 }
 
 void turnLeft() {
-  digitalWrite(IN1, LOW); digitalWrite(IN2, HIGH);
-  digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+  // Tank Turn: Left goes Back, Right goes Forward
+  escLeft.write(SPEED_TURN_BACK);
+  escRight.write(SPEED_TURN_FWD);
 }
 
 void turnRight() {
-  digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
-  digitalWrite(IN3, LOW); digitalWrite(IN4, HIGH);
+  // Tank Turn: Left goes Forward, Right goes Back
+  escLeft.write(SPEED_TURN_FWD);
+  escRight.write(SPEED_TURN_BACK);
 }
 
 void stopMotors() {
-  digitalWrite(IN1, LOW); digitalWrite(IN2, LOW);
-  digitalWrite(IN3, LOW); digitalWrite(IN4, LOW);
+  escLeft.write(SPEED_STOP);
+  escRight.write(SPEED_STOP);
+}
+
+// --- HELPER FUNCTION ---
+int readDistance(int trigPin, int echoPin) {
+  digitalWrite(trigPin, LOW); delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH); delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  // Short timeout (25ms) to prevent blocking the robot loop
+  long duration = pulseIn(echoPin, HIGH, 25000); 
+  
+  if (duration == 0) return 999; // No obstacle (infinity)
+  return duration * 0.034 / 2;
 }
