@@ -5,28 +5,40 @@ import termios
 import tty
 import select
 
-# --- CONFIGURATION ---
-SERIAL_PORT = '/dev/ttyACM0' # Check if it is ACM0 or USB0
+# ==========================================
+# CONFIGURATION
+# ==========================================
+SERIAL_PORT = '/dev/ttyACM0' # Ensure this matches your Pi's port
 BAUD_RATE = 9600
 
-# --- SETUP SERIAL CONNECTION ---
+# Speeds for the ESCs (90 is neutral)
+SPEED_FWD = 110
+SPEED_REV = 70
+SPEED_NEUTRAL = 90
+
+# Steps for the NEMA 17 Probe
+PROBE_STEPS_AMOUNT = 200
+
+# ==========================================
+# SETUP SERIAL CONNECTION
+# ==========================================
 try:
     print(f"Connecting to Arduino on {SERIAL_PORT}...")
     robot = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
-    time.sleep(2) # Wait for Arduino to reset/reboot
+    time.sleep(2) # Wait for Arduino to reset
     print("Connection established! Robot is ready.")
 except serial.SerialException:
     print(f"ERROR: Could not connect to {SERIAL_PORT}.")
     sys.exit(1)
 
-# --- KEYBOARD INPUT HELPER ---
-# This function reads a single keypress without requiring 'Enter'
+# ==========================================
+# KEYBOARD INPUT HELPER (NON-BLOCKING)
+# ==========================================
 def get_key():
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
         tty.setraw(sys.stdin.fileno())
-        # Check if there is input available (non-blocking check)
         rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
         if rlist:
             key = sys.stdin.read(1)
@@ -36,62 +48,79 @@ def get_key():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return key.upper()
 
-# --- MAIN LOOP ---
+# ==========================================
+# COMMAND FUNCTIONS
+# ==========================================
+def send_command(cmd):
+    # Add newline so Arduino's parseInt() processes it immediately
+    robot.write((cmd + '\n').encode('utf-8'))
+
+# ==========================================
+# MAIN TELEOPERATION LOOP
+# ==========================================
 def main():
-    print("\n--- AGRI-SCOUT TELEOPERATION ---")
-    print("CONTROLS: [W] Forward  [S] Backward  [A] Left  [D] Right")
-    print("          [SPACE] Stop  [T] Telemetry (Sensors)  [Q] Quit")
-    print("---------------------------------------------------------")
+    print("\n=== AGRI-SCOUT TELEOPERATION ===")
+    print("W : Forward       I : Probe Down")
+    print("S : Backward      K : Probe Up")
+    print("A : Turn Left")
+    print("D : Turn Right")
+    print("SPACE : Stop All  Q : Quit")
+    print("================================\n")
 
     try:
         while True:
-            # 1. Get User Input
             key = get_key()
             
-            command_sent = False
-            
             if key == 'W':
-                robot.write(b'F')
-                command_sent = True
+                print("\r[MOVE] Forward                ", end='')
+                send_command(f"W{SPEED_FWD} {SPEED_FWD}")
+                
             elif key == 'S':
-                robot.write(b'B') # Backward
-                command_sent = True
+                print("\r[MOVE] Backward               ", end='')
+                send_command(f"W{SPEED_REV} {SPEED_REV}")
+                
             elif key == 'A':
-                robot.write(b'L')
-                command_sent = True
+                # Skid-steer: Left reverse, Right forward
+                print("\r[MOVE] Left                   ", end='')
+                send_command(f"W{SPEED_REV} {SPEED_FWD}")
+                
             elif key == 'D':
-                robot.write(b'R')
-                command_sent = True
+                # Skid-steer: Left forward, Right reverse
+                print("\r[MOVE] Right                  ", end='')
+                send_command(f"W{SPEED_FWD} {SPEED_REV}")
+                
             elif key == ' ' or key == 'P':
-                robot.write(b'S') # Stop
-                print("\r[STOP] Stopping Motors...", end='')
-                command_sent = True
-            elif key == 'T':
-                robot.write(b'T') # Telemetry
-                print("\r[DATA] Requesting Sensor Data...", end='')
-                command_sent = True
+                print("\r[STOP] Stopping Wheels        ", end='')
+                send_command(f"W{SPEED_NEUTRAL} {SPEED_NEUTRAL}")
+                
+            elif key == 'I':
+                print(f"\r[PROBE] Going DOWN ({PROBE_STEPS_AMOUNT} steps)", end='')
+                send_command(f"S{PROBE_STEPS_AMOUNT}")
+                
+            elif key == 'K':
+                print(f"\r[PROBE] Going UP ({-PROBE_STEPS_AMOUNT} steps)", end='')
+                send_command(f"S{-PROBE_STEPS_AMOUNT}")
+                
             elif key == 'Q':
-                print("\nExiting...")
-                robot.write(b'S') # Stop before quitting
+                print("\nExiting and stopping robot...")
+                send_command(f"W{SPEED_NEUTRAL} {SPEED_NEUTRAL}")
                 break
 
-            # 2. Read Feedback from Arduino (The "Reflex")
-            # The Arduino sends back text like "MOVING_FWD" or "WARNING: OBSTACLE"
-            if robot.in_waiting > 0:
+            # Read feedback from Arduino to keep the buffer clean
+            while robot.in_waiting > 0:
                 try:
                     line = robot.readline().decode('utf-8').strip()
                     if line:
-                        # Clear line and print status
-                        print(f"\rRobot Status: {line}              ", end='')
-                except:
+                        print(f"\n[Arduino]: {line}")
+                except UnicodeDecodeError:
                     pass
             
-            # Small delay to prevent CPU flooding
-            time.sleep(0.05)
+            time.sleep(0.05) # Prevent CPU flooding
 
     except KeyboardInterrupt:
         print("\nInterrupted by user.")
     finally:
+        send_command(f"W{SPEED_NEUTRAL} {SPEED_NEUTRAL}") # Failsafe stop
         robot.close()
         print("Serial connection closed.")
 
