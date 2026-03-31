@@ -11,10 +11,8 @@ import select
 SERIAL_PORT = '/dev/ttyACM0' # Ensure this matches your Pi's port
 BAUD_RATE = 9600
 
-# Speeds for the ESCs (90 is neutral)
-SPEED_FWD = 110
-SPEED_REV = 70
-SPEED_NEUTRAL = 90
+# Speed intensity for new robust commands
+MOVE_SPEED = 20
 
 # Steps for the NEMA 17 Probe
 PROBE_STEPS_AMOUNT = 200
@@ -73,37 +71,37 @@ def main():
             
             if key == 'W':
                 print("\r[MOVE] Forward                ", end='')
-                send_command(f"W{SPEED_FWD} {SPEED_FWD}")
+                send_command(f"F{MOVE_SPEED}")
                 
             elif key == 'S':
                 print("\r[MOVE] Backward               ", end='')
-                send_command(f"W{SPEED_REV} {SPEED_REV}")
+                send_command(f"B{MOVE_SPEED}")
                 
             elif key == 'A':
-                # Skid-steer: Left reverse, Right forward
+                # Skid-steer handled by Arduino now
                 print("\r[MOVE] Left                   ", end='')
-                send_command(f"W{SPEED_REV} {SPEED_FWD}")
+                send_command(f"L{MOVE_SPEED}")
                 
             elif key == 'D':
-                # Skid-steer: Left forward, Right reverse
+                # Skid-steer handled by Arduino now
                 print("\r[MOVE] Right                  ", end='')
-                send_command(f"W{SPEED_FWD} {SPEED_REV}")
+                send_command(f"R{MOVE_SPEED}")
                 
             elif key == ' ' or key == 'P':
                 print("\r[STOP] Stopping Wheels        ", end='')
-                send_command(f"W{SPEED_NEUTRAL} {SPEED_NEUTRAL}")
+                send_command("X")
                 
             elif key == 'I':
-                print(f"\r[PROBE] Going DOWN ({PROBE_STEPS_AMOUNT} steps)", end='')
-                send_command(f"S{PROBE_STEPS_AMOUNT}")
+                print("\r[PROBE] Moving DOWN continuously...   ", end='')
+                send_command("D")
                 
             elif key == 'K':
-                print(f"\r[PROBE] Going UP ({-PROBE_STEPS_AMOUNT} steps)", end='')
-                send_command(f"S{-PROBE_STEPS_AMOUNT}")
+                print("\r[PROBE] Moving UP continuously...     ", end='')
+                send_command("U")
                 
             elif key == 'Q':
                 print("\nExiting and stopping robot...")
-                send_command(f"W{SPEED_NEUTRAL} {SPEED_NEUTRAL}")
+                send_command("X")
                 break
 
             # Read feedback from Arduino to keep the buffer clean
@@ -120,7 +118,7 @@ def main():
     except KeyboardInterrupt:
         print("\nInterrupted by user.")
     finally:
-        send_command(f"W{SPEED_NEUTRAL} {SPEED_NEUTRAL}") # Failsafe stop
+        send_command("X") # Failsafe stop
         robot.close()
         print("Serial connection closed.")
 
