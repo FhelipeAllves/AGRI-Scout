@@ -1,0 +1,73 @@
+\documentclass [12pt, a4paper]{article}
+
+% Acentos e Francês
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{wrapfig}
+\usepackage[pdftex]{color,graphicx}
+\usepackage{mathrsfs}
+\usepackage[labelformat = empty]{subcaption}
+\usepackage[justification=centering]{caption}
+\usepackage[]{multirow}
+\usepackage{float}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{siunitx}
+\usepackage{upquote}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+% Margens
+\usepackage[top=3cm, bottom=3cm, left=3cm, right=3cm]{geometry}
+% Fonte
+\usepackage[T1]{fontenc}
+\usepackage{fancyhdr} 
+\pagestyle{fancy}     
+
+\fancyhf{}             
+\lhead{UE 3.4 - Projet \hfill \thepage}
+
+\begin{document}
+
+% Capa de apresentação
+\input{Capa}
+
+% Sumário
+\renewcommand{\contentsname}{\centering Sommaire}
+\tableofcontents
+\thispagestyle{empty} 
+\setcounter{page}{0} 
+
+\newpage
+\section{Introduction}
+Ce \textbf{User Manual} détaille les opérations complètes de l'Agri-Scout. Il s'adresse à l'opérateur final souhaitant comprendre les missions et l'interface de contrôle.
+
+\section{Comportement Nominal (Mission Agricole)}
+\subsection{Suivi de Ligne}
+L'Agri-Scout est conçu pour naviguer dans un environnement agricole de manière autonome. À l'aide de sa caméra pointée vers le sol, il identifie la piste (ligne blanche ou marquage au sol) et utilise un contrôle Différentiel pour naviguer de façon fluide sans recourir aux freins brusques de l'ESC.
+
+\subsection{Détection de Zone d'Analyse (Marqueur Rouge)}
+Lorsque le robot détecte un marqueur rouge d'une taille critique (seuil ajusté à la résolution 160x120), il déclenche la routine de récolte :
+\begin{enumerate}
+    \item Arrêt complet des moteurs de traction.
+    \item Déploiement de la sonde mécanique dans le sol (-11000 pas).
+    \item Attente stricte de 10 secondes pour recueillir l'humidité et d'autres paramètres.
+    \item Rétractation de la sonde (+11000 pas).
+    \item Procédure "Blind Overdrive" (Avance à l'aveugle) pour traverser l'obstacle rouge et retrouver la ligne de l'autre côté.
+\end{enumerate}
+
+\section{Interface de Suivi (RQT Image View)}
+L'opérateur peut surveiller le robot à distance. Pour ne pas surcharger le réseau Wi-Fi local, le flux vidéo envoyé par le robot est compressé et expédié à un taux réduit.
+\begin{verbatim}
+ros2 run rqt_image_view rqt_image_view
+\end{verbatim}
+Sélectionnez le topic \texttt{/agri\_debug} pour visualiser l'algorithme OpenCV en direct.
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.7\textwidth]{images/placeholder_rqt_view.png}
+    \caption{Visualisation RQT Image View de l'Algorithme (Insérer image ici)}
+\end{figure}
+
+\end{document}

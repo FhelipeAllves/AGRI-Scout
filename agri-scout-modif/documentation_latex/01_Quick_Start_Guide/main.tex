@@ -1,0 +1,80 @@
+\documentclass [12pt, a4paper]{article}
+
+% Acentos e Francês
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{wrapfig}
+\usepackage[pdftex]{color,graphicx}
+\usepackage{mathrsfs}
+\usepackage[labelformat = empty]{subcaption}
+\usepackage[justification=centering]{caption}
+\usepackage[]{multirow}
+\usepackage{float}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{siunitx}
+\usepackage{upquote}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+% Margens
+\usepackage[top=3cm, bottom=3cm, left=3cm, right=3cm]{geometry}
+% Fonte
+\usepackage[T1]{fontenc}
+\usepackage{fancyhdr} 
+\pagestyle{fancy}     
+
+\fancyhf{}             
+\lhead{UE 3.4 - Projet \hfill \thepage}
+
+\begin{document}
+
+% Capa de apresentação
+\input{Capa}
+
+% Sumário
+\renewcommand{\contentsname}{\centering Sommaire}
+\tableofcontents
+\thispagestyle{empty} 
+\setcounter{page}{0} 
+
+\newpage
+\section{Introduction}
+Ce document est le \textbf{Quick Start Guide}. Il contient les étapes essentielles pour assembler, mettre sous tension et démarrer une mission d'inspection autonome avec l'Agri-Scout.
+
+\section{Prérequis Matériels}
+Pour démarrer le robot, il faut s'assurer d'avoir les éléments suivants :
+\begin{itemize}
+    \item Batterie LiPo (pour les moteurs et ponts en H L298N).
+    \item Powerbank USB-C (pour alimenter le Raspberry Pi de manière isolée afin d'éviter les chutes de tension "brown-outs").
+    \item Câble USB de données entre le Raspberry Pi et l'Arduino (le fil rouge 5V a été coupé pour isoler les alimentations, mais le GND commun est impératif).
+\end{itemize}
+
+\section{Procédure de Démarrage}
+\subsection{Mise sous tension}
+\begin{enumerate}
+    \item Connectez la Powerbank au Raspberry Pi. Attendez que le système d'exploitation démarre.
+    \item Connectez la batterie LiPo au circuit de puissance des moteurs.
+    \item Branchez la sonde à vis (moteur pas-à-pas) sur ses broches.
+\end{enumerate}
+
+\subsection{Démarrage Logiciel}
+Une fois connecté en SSH au Raspberry Pi, exécutez le script d'initialisation principal :
+\begin{verbatim}
+ros2 launch ~/AGRI-Scout_Modif/demo.launch.py
+\end{verbatim}
+Ce fichier se charge de lancer :
+\begin{itemize}
+    \item Le nœud de la caméra (V4L2).
+    \item Le nœud du RPLiDAR.
+    \item Le contrôleur de vision et de mouvement Python (\texttt{agri\_line\_follower.py}).
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.6\textwidth]{images/placeholder_robot_ready.png}
+    \caption{Robot prêt au départ (Insérer image du robot assemblé ici)}
+\end{figure}
+
+\end{document}

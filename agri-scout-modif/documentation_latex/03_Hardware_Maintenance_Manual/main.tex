@@ -1,0 +1,80 @@
+\documentclass [12pt, a4paper]{article}
+
+% Acentos e Francês
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{wrapfig}
+\usepackage[pdftex]{color,graphicx}
+\usepackage{mathrsfs}
+\usepackage[labelformat = empty]{subcaption}
+\usepackage[justification=centering]{caption}
+\usepackage[]{multirow}
+\usepackage{float}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{siunitx}
+\usepackage{upquote}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+% Margens
+\usepackage[top=3cm, bottom=3cm, left=3cm, right=3cm]{geometry}
+% Fonte
+\usepackage[T1]{fontenc}
+\usepackage{fancyhdr} 
+\pagestyle{fancy}     
+
+\fancyhf{}             
+\lhead{UE 3.4 - Projet \hfill \thepage}
+
+\begin{document}
+
+% Capa de apresentação
+\input{Capa}
+
+% Sumário
+\renewcommand{\contentsname}{\centering Sommaire}
+\tableofcontents
+\thispagestyle{empty} 
+\setcounter{page}{0} 
+
+\newpage
+\section{Introduction}
+Ce \textbf{Hardware Maintenance Manual} est le document technique pour le démontage, la réparation et la fabrication des pièces mécaniques du robot Agri-Scout. La majeure partie de la structure a été conceptualisée en impression 3D de zéro par l'équipe.
+
+\section{Conception Mécanique 3D}
+Nous avons conçu plusieurs éléments critiques pour assurer l'intégration des capteurs et la mobilité de la sonde.
+
+\subsection{Système de Sonde (Le Levier)}
+Le mécanisme de la sonde est l'un des plus grands défis mécaniques du projet.
+Il a fallu concevoir une "alavanca" (levier) en impression 3D qui relie le moteur pas-à-pas à la vis sans fin de pénétration du sol. L'effort en couple est très élevé, la conception 3D a été renforcée autour du pivot.
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.6\textwidth]{images/placeholder_3d_lever.png}
+    \caption{Rendu 3D du mécanisme de levier pour la sonde (Insérer image CAO ici)}
+\end{figure}
+Pour remplacer ce levier : dévissez les fixations centrales, séparez l'axe du moteur et glissez la nouvelle pièce.
+
+\subsection{Supports Moteur et Capteurs}
+Les éléments suivants ont été également conçus en interne :
+\begin{itemize}
+    \item \textbf{Support Moteur Sonde} : Encaisse les forces de torsion lors de la pénétration (11000 pas) dans un sol dense.
+    \item \textbf{Support Batterie} : Conçu pour isoler la Powerbank et la batterie LiPo des autres circuits sensibles.
+    \item \textbf{Support LiDAR / IMU} : Plateforme surélevée assurant un champ de vision à 360 degrés sans obstruction par les câbles.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.6\textwidth]{images/placeholder_3d_supports.png}
+    \caption{Support du LiDAR et des Batteries (Insérer images CAO ici)}
+\end{figure}
+
+\section{Débogage Matériel Courant}
+\subsection{Roues folles au démarrage (GND Flottant)}
+Si les roues gauches ou droites tournent seules dès l'allumage : cela indique une absence de masse (GND) commune entre le Raspberry Pi et l'Arduino/ESC. Vérifiez la liaison physique du câble GND de l'ESC vers l'Arduino.
+
+\subsection{LiDAR muet}
+Si le LiDAR tourne physiquement mais n'envoie aucune donnée, assurez-vous que le port \texttt{/dev/ttyUSB0} est bien assigné. Le mode \texttt{BEST\_EFFORT} (QoS) est requis.
+
+\end{document}

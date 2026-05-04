@@ -1,0 +1,68 @@
+\documentclass [12pt, a4paper]{article}
+
+% Acentos e Francês
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{wrapfig}
+\usepackage[pdftex]{color,graphicx}
+\usepackage{mathrsfs}
+\usepackage[labelformat = empty]{subcaption}
+\usepackage[justification=centering]{caption}
+\usepackage[]{multirow}
+\usepackage{float}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{siunitx}
+\usepackage{upquote}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+% Margens
+\usepackage[top=3cm, bottom=3cm, left=3cm, right=3cm]{geometry}
+% Fonte
+\usepackage[T1]{fontenc}
+\usepackage{fancyhdr} 
+\pagestyle{fancy}     
+
+\fancyhf{}             
+\lhead{UE 3.4 - Projet \hfill \thepage}
+
+\begin{document}
+
+% Capa de apresentação
+\input{Capa}
+
+% Sumário
+\renewcommand{\contentsname}{\centering Sommaire}
+\tableofcontents
+\thispagestyle{empty} 
+\setcounter{page}{0} 
+
+\newpage
+\section{Introduction}
+Ce \textbf{Rapport d'Avancement Interne} retrace l'évolution du projet Agri-Scout, l'adaptation des objectifs face aux contraintes du monde réel et la répartition du travail au sein de l'équipe (Alves, Barros).
+
+\section{Évolution des Objectifs}
+Initialement, nous avions l'intention de piloter le robot avec des algorithmes très sophistiqués de vision par ordinateur (morphologie complexe, analyse de contours HD).
+Cependant, l'intégration matérielle nous a confronté à une dure réalité : le Raspberry Pi souffrait de réinitialisations soudaines (brown-outs) dues à une limite d'ampérage du convertisseur Traco Power sous forte charge logicielle.
+\newline
+\textbf{Solutions Explorées \& Pivots :}
+\begin{itemize}
+    \item Nous avons exploré la création d'un bus I2C direct, qui s'est révélé instable à cause d'un conflit de Pull-up avec d'autres capteurs (IMU BNO055).
+    \item Nous avons migré la communication vers un câble USB série (UART) modifié avec le VCC sectionné pour isoler électriquement le Raspberry Pi (alimenté par Powerbank) du système de traction (LiPo).
+    \item La logique de vision a été simplifiée (suppression de l'anti-aliasing, division radicale de la résolution à 160x120) pour sauver la stabilité électrique et permettre un "Frame Skipping".
+\end{itemize}
+
+\section{Organisation du Projet}
+La réussite de la construction de zéro ("From Scratch") du rover s'est divisée ainsi :
+\begin{itemize}
+    \item \textbf{Mécanique \& CAO} : Modélisation et impression 3D de l'assemblage complet du système de perforation (Levier/Sonde), des bacs de batteries et de la tourelle LiDAR. Ce travail d'ingénierie physique a exigé de nombreuses itérations.
+    \item \textbf{Électronique} : Câblage des contrôleurs, isolation galvanique via un GND partagé, et calibrage de la télémétrie. Surmontement du bug des freins ESC (ABS RC).
+    \item \textbf{Logiciel (ROS 2)} : Déploiement de ROS Jazzy, création d'un nœud \texttt{agri\_line\_follower} asynchrone capable de prendre des décisions critiques et développement d'un Watchdog logiciel pour la sécurité des moteurs (Routine "Blind Overdrive").
+\end{itemize}
+
+\section{Conclusion Interne}
+Malgré des défis matériels majeurs (des instabilités de réseau aux limitations de tension), l'Agri-Scout atteint ses objectifs finaux de navigation autonome par caméra, détection d'intérêts agricoles par colorimétrie et pénétration du sol via une conception mécanique inédite.
+
+\end{document}

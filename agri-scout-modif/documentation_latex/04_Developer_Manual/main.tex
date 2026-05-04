@@ -1,0 +1,76 @@
+\documentclass [12pt, a4paper]{article}
+
+% Acentos e Francês
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{wrapfig}
+\usepackage[pdftex]{color,graphicx}
+\usepackage{mathrsfs}
+\usepackage[labelformat = empty]{subcaption}
+\usepackage[justification=centering]{caption}
+\usepackage[]{multirow}
+\usepackage{float}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{siunitx}
+\usepackage{upquote}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+% Margens
+\usepackage[top=3cm, bottom=3cm, left=3cm, right=3cm]{geometry}
+% Fonte
+\usepackage[T1]{fontenc}
+\usepackage{fancyhdr} 
+\pagestyle{fancy}     
+
+\fancyhf{}             
+\lhead{UE 3.4 - Projet \hfill \thepage}
+
+\begin{document}
+
+% Capa de apresentação
+\input{Capa}
+
+% Sumário
+\renewcommand{\contentsname}{\centering Sommaire}
+\tableofcontents
+\thispagestyle{empty} 
+\setcounter{page}{0} 
+
+\newpage
+\section{Introduction}
+Le \textbf{Developer Manual} décrit l'architecture logicielle complexe du robot. L'Agri-Scout est propulsé par ROS 2 Jazzy, OpenCV et un pont de communication dynamique avec Arduino.
+
+\section{Architecture Logicielle}
+\subsection{Le Nœud de Traitement Python (\texttt{agri\_line\_follower.py})}
+Ce nœud agit comme le "Cerveau" du robot. Il intègre trois flux asynchrones : la caméra V4L2, le scanner LaserScan du RPLiDAR, et le port Série (UART) de l'Arduino.
+Afin d'éviter une surcharge de courant (Brown-out) sur le Raspberry Pi, nous avons imposé plusieurs verrous de performance :
+\begin{itemize}
+    \item \textbf{OpenCV Mono-Core} : \texttt{cv2.setNumThreads(1)} force l'algorithme à n'utiliser qu'un seul cœur CPU.
+    \item \textbf{Downscaling Extrême} : L'image native est écrasée à 160x120 pixels, réduisant considérablement la charge mathématique des algorithmes de détection.
+    \item \textbf{Network Throttling} : Les trames envoyées au PC de débogage (\texttt{/agri\_debug}) sont sautées (1 trame sur 15).
+\end{itemize}
+
+\subsection{Le Firmware Arduino (Protocol \texttt{M})}
+Dans \texttt{test\_with\_motor.ino}, l'Arduino agit comme un esclave "Raw PWM".
+Auparavant, le pilotage "Skid-Steer" entraînait un problème critique avec les ESC RC standard : envoyer un ordre de marche arrière sur une roue en marche avant engageait le mode "Freinage ABS", bloquant physiquement le robot.
+\newline
+Nous avons migré vers une architecture de Commande Différentielle Absolue (Commande \texttt{M <PwmGauche> <PwmDroit>}). Le Python envoie désormais les vecteurs de propulsion exacts, évitant de franchir le point mort et neutralisant le freinage indésirable.
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.7\textwidth]{images/placeholder_arch.png}
+    \caption{Architecture logicielle ROS 2 et Arduino (Insérer rqt\_graph ici)}
+\end{figure}
+
+\section{Compilation et Modification}
+Pour recompiler le nœud ROS 2 :
+\begin{verbatim}
+cd ~/AGRI-Scout_Modif
+colcon build --packages-select <votre_package>
+\end{verbatim}
+Pour modifier le code Arduino, utilisez l'IDE Arduino sur le code source dans le dossier \texttt{arduino\_firmware}.
+
+\end{document}
