@@ -26,7 +26,7 @@
 \pagestyle{fancy}     
 
 \fancyhf{}             
-\lhead{UE 3.4 - Projet \hfill \thepage}
+\lhead{UE 4.4 - Projet \hfill \thepage}
 
 \begin{document}
 
@@ -46,24 +46,114 @@ Ce document est le \textbf{Quick Start Guide}. Il contient les étapes essentiel
 \section{Prérequis Matériels}
 Pour démarrer le robot, il faut s'assurer d'avoir les éléments suivants :
 \begin{itemize}
-    \item Batterie LiPo (pour les moteurs et ponts en H L298N).
+    \item 2 Batteries LiPo (pour les moteurs et ponts en H L298N).
     \item Powerbank USB-C (pour alimenter le Raspberry Pi de manière isolée afin d'éviter les chutes de tension "brown-outs").
-    \item Câble USB de données entre le Raspberry Pi et l'Arduino (le fil rouge 5V a été coupé pour isoler les alimentations, mais le GND commun est impératif).
+    % \item Câble USB de données entre le Raspberry Pi et l'Arduino (le fil rouge 5V a été coupé pour isoler les alimentations, mais le GND commun est impératif).
 \end{itemize}
 
 \section{Procédure de Démarrage}
 \subsection{Mise sous tension}
 \begin{enumerate}
-    \item Connectez la Powerbank au Raspberry Pi. Attendez que le système d'exploitation démarre.
-    \item Connectez la batterie LiPo au circuit de puissance des moteurs.
-    \item Branchez la sonde à vis (moteur pas-à-pas) sur ses broches.
+    \item Connectez la Powerbank au Raspberry Pi. 
+    Attendez que le système d'exploitation démarre. La Raspberry a été fixée en dessous du châssis supérieur pour bien diviser tous les composants atachés au robot. 
+    L'image \ref{fig:pi} montre la position du Raspberry Pi.
+    \begin{figure}[H]
+        \centering
+        % \includegraphics[width=0.6\textwidth]{images/placeholder_pi.png}
+        \caption{Raspberry Pi fixé sous le châssis supérieur.}
+        \label{fig:pi}
+    \end{figure} 
+
+    \item Insérez la batterie LiPo 5000mAh dans votre support et branchez-la au circuit de puissance des moteurs, ensuite activez l'interrupteur,
+     comme le montrent les images ci-dessous.
+    \begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        % \includegraphics[width=\textwidth]{images/battery_5A.jpeg}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        % \includegraphics[width=\textwidth]{images/interrupteur.jpeg}
+    \end{minipage}
+    \caption{Batterie LiPo 5000mAh et interrupteur d'activation.}
+    \label{fig:bat_5A}
+\end{figure}
+        Assurez-vous que les moteurs réagissent à l'activation de l'alimentation (le bruit des ESC des moteurs est un bon signe).
+
+    \item Branchez la batterie LiPo 2200mAh au deuxième câble d'alimentation pour bien activer le moteur pas-à-pas qui est 
+    responsable de monter et descendre la sonde à vis. 
+    \begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        % \includegraphics[width=\textwidth]{images/battery_2200mAh.jpeg}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        % \includegraphics[width=\textwidth]{images/connection.jpeg}
+    \end{minipage}
+    \caption{Batterie LiPo 2200mAh.}
+    \label{fig:bat_2200mAh}
+\end{figure}
 \end{enumerate}
 
+
+
+
+
+
+
+
+
+
+
+
+
 \subsection{Démarrage Logiciel}
+
+Pour se connecter au Raspberry Pi pour la première fois, vous devez utiliser un cable Ethernet pour connecter le Raspberry Pi à votre ordinateur.
+D'abord, il faut metre en place des configurations sur votre ordinateur. Les instructions suivantes sont pour les systèmes Linux. Comme en general,
+la langua de configuration est en anglais, les instructions sont écrites en anglais pour éviter les confusions.
+\begin{enumerate}
+    \item Open \textbf{Settings → Network};
+    \item Locate the \textbf{Wired} connection;
+    \item Open the IPv4 tab;
+    \item Change \textbf{Method} from \textbf{Automatic (DHCP)} to \textbf{Shared to other computers};
+    \item Click \textbf{Apply};
+    \item Disable and re-enable the wired connection to restart the interface.
+\end{enumerate}
+Avec cette configuration, votre ordinateur agira comme un serveur DHCP pour le Raspberry Pi, lui attribuant une adresse IP automatiquement.
+
+La deuxième étape est de se connecter au Raspberry Pi en utilisant SSH. Ouvrez un terminal et tapez la commande suivante :
+\begin{verbatim}
+arp -a
+\end{verbatim}
+Cette commande affichera une liste des appareils connectés à votre réseau local. 
+Trouvez l'adresse IP associée au Raspberry Pi, généralement \textit{10.42.0.x} et connectez-vous en utilisant la commande SSH suivante :
+\begin{verbatim}
+ssh ubuntu@10.42.0.x
+\end{verbatim}
+Le mot de passe est : \textbf{agribot}.
+
+Si l'utilisateur préfère une connexion sans fil, il est possible de changer la configuration 
+du Raspberry Pi pour se connecter à un réseau Wi-Fi local, par exemple, d'un portable. 
+Cependant, cela nécessite une configuration préalable du Raspberry Pi pour se connecter au réseau Wi-Fi.
+
+
 Une fois connecté en SSH au Raspberry Pi, exécutez le script d'initialisation principal :
 \begin{verbatim}
-ros2 launch ~/AGRI-Scout_Modif/demo.launch.py
+source /opt/ros/humble/setup.bash
+
+cd ~/AGRI-Scout_Modif
+
+source install/setup.bash
+
+ros2 launch ~/AGRI-Scout_Modif/agri_launch.py
 \end{verbatim}
+
 Ce fichier se charge de lancer :
 \begin{itemize}
     \item Le nœud de la caméra (V4L2).
@@ -74,7 +164,7 @@ Ce fichier se charge de lancer :
 \begin{figure}[H]
     \centering
     % \includegraphics[width=0.6\textwidth]{images/placeholder_robot_ready.png}
-    \caption{Robot prêt au départ (Insérer image du robot assemblé ici)}
+    \caption{Robot prêt au départ.}
 \end{figure}
 
 \end{document}
