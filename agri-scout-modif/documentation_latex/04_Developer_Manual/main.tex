@@ -17,6 +17,8 @@
 \usepackage{upquote}
 \usepackage{amsmath}
 \usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{positioning, shapes.geometric, arrows.meta}
 
 % Margens
 \usepackage[top=3cm, bottom=3cm, left=3cm, right=3cm]{geometry}
@@ -41,7 +43,223 @@
 
 \newpage
 \section{Introduction}
-Le \textbf{Developer Manual} décrit l'architecture logicielle complexe du robot. L'Agri-Scout est propulsé par ROS 2 Jazzy, OpenCV et un pont de communication dynamique avec Arduino.
+Le Developer Manual décrit l'architecture mécanique, électronique et logicielle complexe du robot.
+L'Agri-Scout est propulsé par ROS 2 Jazzy, OpenCV et un pont de communication dynamique avec Arduino.
+
+\section{Architecture Mécanique}
+Conforme definido em Hardware Maintenance Manual, a partir da estrutura base do robô, foram concebidos
+suportes personalizados para acomodar os sensores e a eletrônica. Como o robô é destinado a operar em ambientes agrícolas, 
+ele é dotado de um sensor para extrair parâmetros do solo. Para que o sensor consiga extrair os parâmetros do solo ele
+deve penetrá-lo, para isso foi projetado uma sonde à vis acopladoa ao chassi do robô, a sonde é acionada por um motor de passo NEMA.
+Dado a complexidade de da concepção e fabricação da sonda, a parte mecânica do robô foi dividida em duas partes principais:
+concepção/fabricação da sonda e demais suportes do robô.
+
+
+\subsection{Chassi base do robô}
+
+A estrutura base do robo pode ser vista na figura \ref{fig:chassi}, bem como os motores e sues ESCs de comandos. 
+Pode-se verificar que cada roda possui um motor, os motores da esquerda são controlados por um dos ESCs e os motores da direita
+pelo outro ECS.
+
+\begin{figure}[H]
+    \centering
+     \includegraphics[width=0.4\textwidth, angle=-90]{images/chassi.jpeg}
+    \caption{Chassi base do robo}
+    \label{fig:chassi} 
+\end{figure}
+
+Visto que ao robô são acoplados diversos componentes, foi necessário incluir mais um estágio ao robo. Uma chapa de aluminio foi 
+escolhida para ser o segundo estágio do robo, dado a facilidade de perfuração e a resistência do material. Sendo assim, a chapa
+foi cortada em laboratório conforme as medidas do chassi. Suportes metálicos foram utilizados para fixar a chapa ao 
+chassi, a figura \ref{fig:chassi_final} mostra o chassi finalizado e pronto para receber os componentes. 
+\begin{figure}[H]
+    \centering
+     \includegraphics[width=0.7\textwidth]{images/chassi2.jpeg}
+    \caption{Chassi base + segundo estágio.}
+    \label{fig:chassi_final}
+\end{figure}
+
+
+
+
+
+
+
+
+\subsection{Concepção e fabricação sonde à vis}
+Foram utilizados materias disponiveis no laboratorio para inicio da produção da sonda. Um motor de passo NEMA, um suporte para 
+toda estrutura e o parafuso foram utilizados, a partir das dimensões fixas desses componentes, foi projetado o restante da estrutura. 
+A concepção da sonda à vis foi feita utilizando o software Autodesk Inventor, a partir medidas do motor de passo NEMA, 
+foram projetados os suportes para o motor e para o parafuso. Após a concepção, os arquivos foram exportados em formato STL 
+e enviados para impressão 3D. As imagens abaixo mostram os suportes projetados:
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Sup_motor.png}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/sup_inf.png}
+    \end{minipage}
+    \vfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/sup_sensor.png}
+    \end{minipage}
+    \caption{Concepção sonde à vis.}
+    \label{fig:x}
+\end{figure}
+
+A figura \ref{fig:sonda} mostra sonda à vis finalizada e pronta para se anexada ao chassi do robo.
+
+\begin{figure}[H]
+      \centering
+    \includegraphics[width=0.5\textwidth]{images/sonda.jpeg}
+    \caption{sonde à vis finalizada}
+    \label{fig:sonda}  
+\end{figure}
+
+
+\subsection{Concepção e fabricação dos demais suportes}
+Visto que o robo pode operar em terrenos irregulares as baterias precisam estar bem fixadas ao chassi para evitar
+desligamentos inesperados, assim dois suportes para cada uma das baterias foram projetados, comforme indica a figura
+\ref{fig:suportes_baterias}.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bat_5.png}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bat_22.png}
+    \end{minipage}
+    \caption{Batterie LiPo 2200mAh.}
+    \label{fig:suportes_baterias}
+\end{figure}
+
+Outro suporte importante para elevar o LIDAR, central inercial e fornecer o acapamento estático para o robo está indicado na 
+figura \ref{fig:suporte_lidar}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/elevation.png}
+    \caption{Suporte para elevação do LIDAR e central inercial.}
+    \label{fig:suporte_lidar}
+\end{figure}
+
+Foi projetado também um suporte para se fixar ao suporte da figura \ref{fig:suporte_lidar}, este último suporte serve para
+fazer a fixação do LIDAR e central inercial, além disso permite a rotação dos sensores para melhor calibrar e definir
+as referências de ambos os sensores.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/imu_lidar.png}
+    \caption{Suporte para fixação do LIDAR e central inercial.}
+    \label{fig:sup_lidar}
+\end{figure}
+
+
+
+
+\section{Architecture Électronique}
+O central de processamento do robo é um Raspberry Pi 4 em conjunto com o arduino UNO. O arduino é responsável por controlar os 
+motores de todas as rodas, bem como o motor de passo da sonda à vis em conjunto com a ponte H. O arduino garante que o processamento
+de envio de comandos para os motores seja feito de forma rápida e eficiente, evitando atrasos que poderiam ocorrer se o Raspberry Pi
+fosse responsável por isso. O Raspberry Pi é responsável por processar os dados dos sensores, como a câmera e o LIDAR, e enviar os 
+comandos de movimento para o arduino.
+
+Dessa forma, o Raspberry Pi e o Arduino foram fixados ao chassi superior do robo, a ponte H que é conectado ao motor de passo 
+foi fixada diretamente ao Arduino para facilitar a conexão e evitar o uso de cabo longos. A figura \ref{fig:eletronica} 
+mostra a disposição dos componetes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth, angle=-90]{images/pi_ino.jpeg}
+    \caption{Disposição do Raspberry Pi e Arduino.}
+    \label{fig:eletronica}
+\end{figure}
+
+É importante pontuar que a conexão életrica entre o Arduino e os ESCs e com a ponte H pode ser verificada a partir do 
+do código no arquivo \texttt{main\_firmware.ino}. Após ter acesso a Raspberry Pi usando as intruções presentes em 
+\textit{Quick Start Guide}, o código é acessável no diretório :
+\begin{verbatim}
+~/AGRI-Scout_Modif/arduino_firmware/main_firmware/main_firmware.ino
+\end{verbatim}
+o diagrama simplificado da figura \ref{fig:diagram} mostra as conexões elétricas entre os componentes.
+
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        node distance=2cm,
+        block/.style={rectangle, draw, fill=blue!10, text width=3.5cm, text centered, minimum height=4cm, font=\bfseries},
+        smallblock/.style={rectangle, draw, fill=green!10, text width=2.5cm, text centered, minimum height=1.5cm},
+        motor/.style={circle, draw, fill=orange!10, text width=2cm, text centered, minimum size=2cm},
+        line/.style={draw, -{Stealth[scale=1.2]}}
+    ]
+
+    % --- Blocos Principais ---
+    \node [block] (arduino) {Arduino Uno};
+    \node [block, right=4cm of arduino] (l298n) {Pont en H};
+    \node [block, below left=3cm and 0.15cm of arduino] (ESCs) {ESCs des roues};
+
+
+% const int PIN_ESC_LEFT = 9;
+% const int PIN_ESC_RIGHT = 10;
+
+    % --- Conexões Arduino -> Ponte H ---
+    % Mapeamento conforme seu código: D4(IN1), D7(IN2), D5(ENA), D6(ENB)
+    \draw [line] ([yshift=1.5cm]arduino.east) -- node[above, font=\small] {pin 4} ([yshift=1.5cm]l298n.west) node[right, pos=1, font=\scriptsize] {M1};
+    \draw [line] ([yshift=0.5cm]arduino.east) -- node[above, font=\small] {pin 7} ([yshift=0.5cm]l298n.west) node[right, pos=1, font=\scriptsize] {M2};
+    \draw [line] ([yshift=-0.5cm]arduino.east) -- node[above, font=\small] {pin 5} ([yshift=-0.5cm]l298n.west) node[right, pos=1, font=\scriptsize] {E1};
+    \draw [line] ([yshift=-1.5cm]arduino.east) -- node[above, font=\small] {pin 6} ([yshift=-1.5cm]l298n.west) node[right, pos=1, font=\scriptsize] {E2};
+
+    % --- Motor de Passo ---
+    \node [motor, below=2cm of l298n] (stepper) {Moteur pas à pas};
+    
+    % Conexão Ponte H -> Motor
+    \draw [line] (l298n.south) -- (stepper.north) node[midway, right] {Sorties A/B};
+    
+    % --- Conexões Arduino -> ESCs ---
+    \draw [line] ([xshift=-0.5cm]arduino.south) |- node[below, font=\small] {pin 9} (ESCs.north east);
+    \draw [line] (arduino.south) |- node[right, font=\small] {pin 10} (ESCs.south east);
+    
+
+    % --- Aterramento (GND) ---
+    \node [ below right=1.8cm and 0.2cm of arduino] (gnd) {Masse commune (GND)};
+    \draw [line] (arduino.south east) -- (gnd.north);
+    \draw [line] (l298n.south west) -- (gnd.north);
+    \draw [line] (ESCs.north) |- (gnd.west);
+
+    % --- Título do Diagrama ---
+    \node [above=0.5cm of arduino, text width=10cm, text centered, font=\Large\bfseries] {Schéma de Câblage};
+
+    \end{tikzpicture}
+    
+    \caption{Diagramme de connexion électrique.}
+    \label{fig:diagram}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \section{Architecture Logicielle}
 \subsection{Le Nœud de Traitement Python (\texttt{agri\_line\_follower.py})}
@@ -54,7 +272,7 @@ Afin d'éviter une surcharge de courant (Brown-out) sur le Raspberry Pi, nous av
 \end{itemize}
 
 \subsection{Le Firmware Arduino (Protocol \texttt{M})}
-Dans \texttt{test\_with\_motor.ino}, l'Arduino agit comme un esclave "Raw PWM".
+Dans \texttt{main\_firmware.ino}, l'Arduino agit comme un esclave "Raw PWM".
 Auparavant, le pilotage "Skid-Steer" entraînait un problème critique avec les ESC RC standard : envoyer un ordre de marche arrière sur une roue en marche avant engageait le mode "Freinage ABS", bloquant physiquement le robot.
 \newline
 Nous avons migré vers une architecture de Commande Différentielle Absolue (Commande \texttt{M <PwmGauche> <PwmDroit>}). Le Python envoie désormais les vecteurs de propulsion exacts, évitant de franchir le point mort et neutralisant le freinage indésirable.
@@ -71,6 +289,19 @@ Pour recompiler le nœud ROS 2 :
 cd ~/AGRI-Scout_Modif
 colcon build --packages-select <votre_package>
 \end{verbatim}
-Pour modifier le code Arduino, utilisez l'IDE Arduino sur le code source dans le dossier \texttt{arduino\_firmware}.
+
+Pour modifier le code Arduino, utilisez l'IDE Arduino sur le code source dans le dossier \texttt{arduino\_firmware}. O Raspberry Pi
+possui instalado o arduino cli o que permite a compilação e envio do firmware diretamente pelo terminal do Raspberry Pi, para 
+facilitar foi criado o \textit{record.sh} esse arquivo permite a compilação e envio, basta o usuário lançar o código abaixo:
+\begin{verbatim}
+bash record.sh <nom_dossier>
+\end{verbatim}
+
+por exemplo se o usuário alterar o código \textit{main\_firmware.ino} o código será :
+\begin{verbatim}
+bash record.sh main_firmware
+\end{verbatim}
+
+
 
 \end{document}

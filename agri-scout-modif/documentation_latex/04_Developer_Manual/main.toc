@@ -1,6 +1,11 @@
 \babel@toc {french}{}\relax 
 \contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
-\contentsline {section}{\numberline {2}Architecture Logicielle}{1}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Le Nœud de Traitement Python (\texttt {agri\_line\_follower.py})}{1}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Le Firmware Arduino (Protocol \texttt {M})}{1}{subsection.2.2}%
-\contentsline {section}{\numberline {3}Compilation et Modification}{1}{section.3}%
+\contentsline {section}{\numberline {2}Architecture Mécanique}{1}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Chassi base do robô}{1}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Concepção e fabricação sonde à vis}{2}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Concepção e fabricação dos demais suportes}{3}{subsection.2.3}%
+\contentsline {section}{\numberline {3}Architecture Électronique}{4}{section.3}%
+\contentsline {section}{\numberline {4}Architecture Logicielle}{5}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Le Nœud de Traitement Python (\texttt {agri\_line\_follower.py})}{5}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Le Firmware Arduino (Protocol \texttt {M})}{5}{subsection.4.2}%
+\contentsline {section}{\numberline {5}Compilation et Modification}{6}{section.5}%
