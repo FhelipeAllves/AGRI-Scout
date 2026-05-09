@@ -1,7 +1,7 @@
 # Fdb version 4
-["pdflatex"] 1778318300.91269 "/home/luiz/Documents/AGRI-Scout/agri-scout-modif/documentation_latex/04_Developer_Manual/main.tex" "main.pdf" "main" 1778318305.72688 0
+["pdflatex"] 1778319466.79202 "/home/luiz/Documents/AGRI-Scout/agri-scout-modif/documentation_latex/04_Developer_Manual/main.tex" "main.pdf" "main" 1778319471.24754 0
   "/etc/texmf/web2c/texmf.cnf" 1769952146.7292 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/luiz/Documents/AGRI-Scout/agri-scout-modif/documentation_latex/04_Developer_Manual/main.tex" 1778318296.00463 12781 8dd4fdb63524d6548adbbefb89047984 ""
+  "/home/luiz/Documents/AGRI-Scout/agri-scout-modif/documentation_latex/04_Developer_Manual/main.tex" 1778319466.4979 12790 cda6e905c80494581ff7f0e052661c43 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecbx1200.tfm" 1136768653 3584 402da0b29eafbad07963b1224b222f18 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecbx1440.tfm" 1136768653 3584 13049b61b922a28b158a38aeff75ee9b ""
@@ -202,10 +202,10 @@
   "images/sonda.jpeg" 1778269020.59624 46780 3f2291fdcb6b957f99238e1ec9c2b42f ""
   "images/sup_inf.png" 1778265109.35873 596332 0f611c9f3a9b40ae9b9d4ac4468a8634 ""
   "images/sup_sensor.png" 1778265109.36613 557683 12f3ba4c99f07570f8fe4438471d111e ""
-  "main.aux" 1778318305.64535 4073 68bfede3019579352d155a45af848fb4 "pdflatex"
-  "main.out" 1778318305.64535 2079 378e4ececac0e0f73a1a53e9c4506a5d "pdflatex"
-  "main.tex" 1778318296.00463 12781 8dd4fdb63524d6548adbbefb89047984 ""
-  "main.toc" 1778318305.64669 962 a666c0a0293f60d4e5d5068a61e1c9a5 "pdflatex"
+  "main.aux" 1778319471.1689 4171 b38785677ceaa2bce8117a9994bf0224 "pdflatex"
+  "main.out" 1778319471.1689 2149 8cd73635f060e01cb14a5146039fb563 "pdflatex"
+  "main.tex" 1778319466.4979 12790 cda6e905c80494581ff7f0e052661c43 ""
+  "main.toc" 1778319471.17067 971 efcce09f3893a031c650dc98f1d309fa "pdflatex"
   (generated)
   "main.aux"
   "main.log"
