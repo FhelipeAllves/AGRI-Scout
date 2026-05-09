@@ -4,7 +4,7 @@
 
 Au démarrage du projet, en septembre 2025, l'équipe avait défini un cahier des charges ambitieux. L'AGRI-Scout devait naviguer de façon autonome entre les rangées de cultures en utilisant la caméra pour suivre les lignes au sol, utiliser YOLO pour la détection et l'évaluation de la récolte (identifier l'état des cultures, détecter des végétaux, fruits ou signes de maladies), s'alimenter via un régulateur de tension centralisé (module Traco Power) depuis une unique batterie LiPo, et déployer une sonde de sol après chaque rangée pour cartographier les données NPK.
 
-Note : les fonctionnalités de détection de feuilles, fruits, légumes et pestes via YOLO ont été retirées du périmètre du projet en raison des contraintes de temps, de la complexité d'annotation des données et des limitations de puissance de calcul. Ces fonctionnalités sont documentées comme pistes d'amélioration future à la section~\ref{sec:ameliorations}.
+Les fonctionnalités de détection de feuilles, fruits, légumes et pestes via YOLO ont été retirées du périmètre du projet en raison des contraintes de temps, de la complexité d'annotation des données et des limitations de puissance de calcul. Ces fonctionnalités sont documentées comme pistes d'amélioration future à la section~\ref{sec:ameliorations}.
 
 \subsection{Les Contraintes Rencontrées}
 
@@ -12,7 +12,7 @@ La confrontation avec la réalité matérielle du projet a révélé plusieurs o
 
 \subsubsection{Instabilité Électrique}
 
-Sous forte charge logicielle, la Raspberry Pi 4 consomme jusqu'à 5W en pointe. Le régulateur Traco Power, partagé avec les ESC des moteurs, ne pouvait pas absorber les pics de courant lors des accélérations, provoquant des chutes de tension et des redémarrages intempestifs (\textit{brown-outs}) rendant toute mission autonome impossible.
+Sous forte charge logicielle, la Raspberry Pi 4 consomme jusqu'à 5W en pointe. Le régulateur Traco Power, partagé avec les ESC des moteurs, ne pouvait pas absorber les pics de courant lors des accélérations, provoquant des chutes de tension et des redémarrages intempestifs (brown-outs) rendant toute mission autonome impossible.
 
 \subsubsection{Problèmes de Communication Série}
 

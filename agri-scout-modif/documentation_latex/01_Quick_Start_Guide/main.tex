@@ -41,7 +41,7 @@
 
 \newpage
 \section{Introduction}
-Ce document est le \textbf{Quick Start Guide}. Il contient les étapes essentielles pour assembler, mettre sous tension et démarrer une mission d'inspection autonome avec l'Agri-Scout.
+Ce document est le Quick Start Guide. Il contient les étapes essentielles pour assembler, mettre sous tension et démarrer une mission d'inspection autonome avec l'Agri-Scout.
 
 \section{Prérequis Matériels}
 Pour démarrer le robot, il faut s'assurer d'avoir les éléments suivants :
@@ -136,11 +136,11 @@ Pour se connecter au Raspberry Pi pour la première fois, vous devez utiliser un
 D'abord, il faut metre en place des configurations sur votre ordinateur. Les instructions suivantes sont pour les systèmes Linux. Comme en general,
 la langua de configuration est en anglais, les instructions sont écrites en anglais pour éviter les confusions.
 \begin{enumerate}
-    \item Open \textbf{Settings → Network};
-    \item Locate the \textbf{Wired} connection;
+    \item Open Settings $\rightarrow$ Network;
+    \item Locate the Wired connection;
     \item Open the IPv4 tab;
-    \item Change \textbf{Method} from \textbf{Automatic (DHCP)} to \textbf{Shared to other computers};
-    \item Click \textbf{Apply};
+    \item Change Method from Automatic (DHCP) to Shared to other computers;
+    \item Click Apply;
     \item Disable and re-enable the wired connection to restart the interface.
 \end{enumerate}
 Avec cette configuration, votre ordinateur agira comme un serveur DHCP pour le Raspberry Pi, lui attribuant une adresse IP automatiquement.
@@ -150,15 +150,13 @@ La deuxième étape est de se connecter au Raspberry Pi en utilisant SSH. Ouvrez
 arp -a
 \end{verbatim}
 Cette commande affichera une liste des appareils connectés à votre réseau local. 
-Trouvez l'adresse IP associée au Raspberry Pi, généralement \textit{10.42.0.x} et connectez-vous en utilisant la commande SSH suivante :
+Trouvez l'adresse IP associée au Raspberry Pi, généralement 10.42.0.x, et connectez-vous en utilisant la commande SSH suivante :
 \begin{verbatim}
 ssh ubuntu@10.42.0.x
 \end{verbatim}
-Le mot de passe est : \textbf{agribot}.
+Le mot de passe est : \texttt{agribot}.
 
-Si l'utilisateur préfère une connexion sans fil, il est possible de changer la configuration 
-du Raspberry Pi pour se connecter à un réseau Wi-Fi local, par exemple, d'un portable. 
-Cependant, cela nécessite une configuration préalable du Raspberry Pi pour se connecter au réseau Wi-Fi.
+Une connexion sans fil est également possible si le Raspberry Pi est configuré au préalable pour rejoindre un réseau Wi-Fi local.
 
 
 Une fois connecté en SSH au Raspberry Pi, exécutez le script d'initialisation principal :

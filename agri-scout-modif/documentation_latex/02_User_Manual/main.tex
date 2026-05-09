@@ -1,6 +1,6 @@
 \documentclass [12pt, a4paper]{article}
 
-% Acentos e Francês
+% Acentos e Français
 \usepackage[utf8]{inputenc}
 \usepackage[french]{babel}
 \usepackage{wrapfig}
@@ -17,6 +17,7 @@
 \usepackage{upquote}
 \usepackage{amsmath}
 \usepackage{hyperref}
+\usepackage{enumitem}
 
 % Margens
 \usepackage[top=3cm, bottom=3cm, left=3cm, right=3cm]{geometry}
@@ -41,33 +42,269 @@
 
 \newpage
 \section{Introduction}
-Ce \textbf{User Manual} détaille les opérations complètes de l'Agri-Scout. Il s'adresse à l'opérateur final souhaitant comprendre les missions et l'interface de contrôle.
+Ce User Manual décrit en détail toutes les utilisations supportées par l'Agri-Scout dans des conditions nominales de fonctionnement. Il s'adresse à l'opérateur final souhaitant comprendre et exploiter l'ensemble des fonctionnalités du robot : mission autonome, téléopération manuelle, acquisition de données pédologiques et surveillance à distance.
 
-\section{Comportement Nominal (Mission Agricole)}
-\subsection{Suivi de Ligne}
-L'Agri-Scout est conçu pour naviguer dans un environnement agricole de manière autonome. À l'aide de sa caméra pointée vers le sol, il identifie la piste (ligne blanche ou marquage au sol) et utilise un contrôle Différentiel pour naviguer de façon fluide sans recourir aux freins brusques de l'ESC.
+L'Agri-Scout est un robot agricole différentiel à quatre roues, équipé d'une caméra USB, d'un LIDAR RPLiDAR A1 et d'une sonde à vis motorisée pour l'analyse du sol. Il est piloté par un Raspberry Pi 4 sous ROS 2 Jazzy, communicant avec un Arduino UNO pour le contrôle des actionneurs.
 
-\subsection{Détection de Zone d'Analyse (Marqueur Rouge)}
-Lorsque le robot détecte un marqueur rouge d'une taille critique (seuil ajusté à la résolution 160x120), il déclenche la routine de récolte :
+Avant toute utilisation, l'opérateur doit s'assurer que le robot a été correctement mis sous tension en suivant le Quick Start Guide.
+
+% ============================================================
+\section{Modes d'Utilisation}
+
+L'Agri-Scout supporte trois modes d'utilisation principaux, sélectionnables selon le scénario opérationnel :
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Mode} & \textbf{Description} \\
+\midrule
+Mission Autonome & Suivi de ligne + récolte automatique. Mode de travail principal. \\
+Téléopération & Contrôle manuel du robot depuis un terminal distant via SSH. \\
+Démonstration (Hunter) & Le robot localise et s'approche d'un objet coloré (drapeau/token). \\
+\bottomrule
+\end{tabularx}
+\caption{Modes d'utilisation de l'Agri-Scout.}
+\end{table}
+
+% ============================================================
+\section{Mode 1 : Mission Autonome}
+
+\subsection{Description générale}
+Dans ce mode, le robot navigue de façon entièrement autonome le long d'une piste balisée par une ligne blanche tracée au sol. À intervalles réguliers (toutes les 30 secondes), ou lorsqu'il détecte un marqueur de récolte rouge, il s'arrête, déploie sa sonde dans le sol pour collecter des données pédologiques, puis reprend sa trajectoire.
+
+\subsection{Lancement de la mission}
+Après connexion SSH au Raspberry Pi (voir Quick Start Guide), exécutez la séquence suivante :
+\begin{verbatim}
+source /opt/ros/jazzy/setup.bash
+cd ~/AGRI-Scout_Modif
+source install/setup.bash
+ros2 launch ~/AGRI-Scout_Modif/demo.launch.py
+\end{verbatim}
+
+Ce fichier de lancement démarre simultanément :
+\begin{itemize}
+    \item Le nœud de la caméra (\texttt{v4l2\_camera\_node}) sur le topic \texttt{/image\_raw}.
+    \item Le nœud du LIDAR RPLiDAR (\texttt{rplidar\_composition}) sur le topic \texttt{/scan}.
+    \item Le nœud de contrôle principal (\texttt{agri\_line\_follower.py}).
+\end{itemize}
+
+\subsection{Suivi de ligne}
+Le robot identifie la piste blanche à l'aide de sa caméra pointée vers le sol. Un algorithme de segmentation HSV isole les pixels blancs dans une zone d'intérêt (50\% inférieur de l'image). Un correcteur PD calcule l'erreur de position latérale du centroïde de la ligne par rapport au centre de l'image et ajuste la différence de vitesse entre les roues gauche et droite pour corriger la trajectoire.
+
+Les seuils HSV par défaut pour la ligne blanche sont :
+\begin{table}[H]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Canal} & \textbf{Min} & \textbf{Max} \\
+\midrule
+H (Teinte) & 0 & 255 \\
+S (Saturation) & 0 & 60 \\
+V (Valeur) & 160 & 255 \\
+\bottomrule
+\end{tabular}
+\caption{Seuils HSV de détection de la ligne blanche.}
+\end{table}
+
+\subsection{Détection d'obstacles (LIDAR)}
+En permanence, le nœud surveille les mesures du LIDAR dans un secteur de $\pm30°$ centré sur l'avant du robot. Si un obstacle est détecté à moins de 20 cm, le robot s'arrête automatiquement et attend que la voie soit dégagée avant de reprendre.
+
+\subsection{Déclenchement de la récolte}
+
+La séquence de récolte peut être déclenchée de deux façons :
+
 \begin{enumerate}
-    \item Arrêt complet des moteurs de traction.
-    \item Déploiement de la sonde mécanique dans le sol (-11000 pas).
-    \item Attente stricte de 10 secondes pour recueillir l'humidité et d'autres paramètres.
-    \item Rétractation de la sonde (+11000 pas).
-    \item Procédure "Blind Overdrive" (Avance à l'aveugle) pour traverser l'obstacle rouge et retrouver la ligne de l'autre côté.
+    \item Par minuterie automatique : toutes les 30 secondes d'opération en mode FOLLOWING, le robot lance automatiquement une récolte, quelle que soit sa position.
+    \item Par marqueur visuel : lorsque la caméra détecte une zone rouge (seuil HSV H: 0--10, S: 120--255, V: 70--255) dont l'aire dépasse le seuil configuré (500 pixels par défaut), le robot lance la séquence de récolte.
 \end{enumerate}
 
-\section{Interface de Suivi (RQT Image View)}
-L'opérateur peut surveiller le robot à distance. Pour ne pas surcharger le réseau Wi-Fi local, le flux vidéo envoyé par le robot est compressé et expédié à un taux réduit.
+\subsection{Séquence de récolte}
+\begin{enumerate}
+    \item Arrêt complet des moteurs de traction (\texttt{CMD X}).
+    \item Descente de la sonde : le moteur pas à pas tourne pendant 15,5 secondes pour enfoncer la sonde dans le sol (\texttt{CMD D}).
+    \item Collecte de données : le robot reste immobile pendant 10 secondes. Durant cette phase, le capteur NPK (si connecté) peut enregistrer les paramètres du sol.
+    \item Remontée de la sonde : le moteur pas à pas remonte la sonde pendant 15,5 secondes (\texttt{CMD U}).
+    \item Avance de dégagement : le robot avance à vitesse réduite pendant 4 secondes pour quitter la zone de récolte et retrouver la ligne (\texttt{CMD F 20}).
+    \item Retour au mode FOLLOWING.
+\end{enumerate}
+
+La durée totale d'une séquence de récolte est d'environ 45 secondes.
+
+\subsection{Arrêt de la mission}
+Pour arrêter proprement la mission, appuyez sur \texttt{Ctrl+C} dans le terminal SSH. Le nœud envoie automatiquement une commande d'arrêt (\texttt{CMD X}) à l'Arduino avant de se terminer. L'Arduino dispose également d'un watchdog interne : si aucune commande n'est reçue pendant plus d'une seconde, les moteurs sont coupés automatiquement.
+
+% ============================================================
+\section{Mode 2 : Téléopération Manuelle}
+
+\subsection{Description}
+Ce mode permet à l'opérateur de contrôler le robot directement depuis un terminal, sans logique autonome. Il est utile pour les déplacements de positionnement, les tests de mobilité ou la calibration mécanique.
+
+\subsection{Lancement}
+Dans un terminal SSH, exécutez :
 \begin{verbatim}
+source /opt/ros/jazzy/setup.bash
+cd ~/AGRI-Scout_Modif
+source install/setup.bash
+python3 python_control/ros2_teleop.py
+\end{verbatim}
+
+\subsection{Commandes clavier}
+\begin{table}[H]
+\centering
+\begin{tabular}{cl}
+\toprule
+\textbf{Touche} & \textbf{Action} \\
+\midrule
+\texttt{W} & Avancer \\
+\texttt{S} & Reculer \\
+\texttt{A} & Tourner à gauche \\
+\texttt{D} & Tourner à droite \\
+\texttt{ESPACE} & Arrêt complet \\
+\texttt{I} & Descendre la sonde (continu) \\
+\texttt{K} & Monter la sonde (continu) \\
+\texttt{Q} & Quitter et arrêter le robot \\
+\bottomrule
+\end{tabular}
+\caption{Mappage clavier de la téléopération.}
+\end{table}
+
+Note : Les commandes sont publiées sur le topic ROS 2 \texttt{agri\_commands}. Le nœud \texttt{ros2\_serial\_bridge.py} doit être actif pour relayer ces commandes vers l'Arduino. En pratique, il est conseillé d'utiliser la téléopération conjointement avec le LIDAR actif pour bénéficier de la protection anti-collision.
+
+% ============================================================
+\section{Mode 3 : Démonstration (Hunter)}
+
+\subsection{Description}
+Le mode Démonstration remplace l'algorithme de suivi de ligne par un algorithme de recherche et d'approche d'un objet coloré (drapeau, cône ou token placé sur le terrain). C'est le mode recommandé pour les présentations où un parcours de ligne n'est pas disponible.
+
+\subsection{Lancement}
+Arrêtez tout nœud actif (\texttt{Ctrl+C}), puis lancez uniquement la caméra, le LIDAR et le nœud hunter :
+\begin{verbatim}
+source /opt/ros/jazzy/setup.bash
+cd ~/AGRI-Scout_Modif
+source install/setup.bash
+python3 python_control/agri_demo_hunter.py
+\end{verbatim}
+
+Note : Le nœud de la caméra et le nœud du LIDAR doivent être lancés séparément ou via un fichier de lancement adapté.
+
+\subsection{Comportement}
+\begin{enumerate}
+    \item SEARCHING : le robot tourne lentement sur lui-même à la recherche d'un objet rouge/orange dans son champ de vision.
+    \item TRACKING : dès que l'objet est détecté, le robot s'aligne et avance vers lui. Un contrôleur proportionnel corrige la trajectoire latéralement.
+    \item HARVESTING : lorsque l'objet occupe une surface suffisante dans l'image (seuil : 15 000 pixels à résolution 320×240), le robot s'arrête et lance la séquence de récolte.
+\end{enumerate}
+
+La couleur cible par défaut (rouge/orange) peut être ajustée dans le fichier \texttt{agri\_demo\_hunter.py} en modifiant les variables \texttt{lower\_color} et \texttt{upper\_color} (format HSV NumPy).
+
+% ============================================================
+\section{Acquisition de Données Pédologiques}
+
+\subsection{Description}
+Le capteur de sol NPK (connecté sur \texttt{/dev/ttyUSB1}) mesure 8 paramètres en continu via le protocole Modbus RTU. Ce script s'exécute indépendamment de ROS 2 et peut être lancé en parallèle d'une mission autonome ou manuellement lors d'une inspection statique.
+
+\subsection{Lancement}
+\begin{verbatim}
+python3 python_control/read_sensor.py
+\end{verbatim}
+
+\subsection{Paramètres mesurés}
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Paramètre} & \textbf{Unité} \\
+\midrule
+Température du sol & °C \\
+Humidité du sol & \% \\
+Conductivité électrique & µS/cm \\
+Salinité & mg/L \\
+Azote (N) & mg/kg \\
+Phosphore (P) & mg/kg \\
+Potassium (K) & mg/kg \\
+pH & --- \\
+\bottomrule
+\end{tabular}
+\caption{Paramètres pédologiques mesurés par le capteur NPK.}
+\end{table}
+
+Les données sont affichées en temps réel dans le terminal. À l'arrêt (\texttt{Ctrl+C}), elles sont automatiquement sauvegardées dans un fichier \texttt{sensor\_data\_log\_corrigido.csv} dans le répertoire courant.
+
+% ============================================================
+\section{Surveillance à Distance (RQT Image View)}
+
+\subsection{Description}
+L'opérateur peut visualiser le flux vidéo traité par l'algorithme OpenCV depuis un PC connecté au même réseau que le Raspberry Pi. Ce flux indique en temps réel les contours détectés, le centroïde de la ligne et l'état du robot.
+
+\subsection{Configuration réseau}
+Assurez-vous que les deux machines partagent le même \texttt{ROS\_DOMAIN\_ID} :
+\begin{verbatim}
+export ROS_DOMAIN_ID=0
+export ROS_LOCALHOST_ONLY=0
+\end{verbatim}
+
+\subsection{Lancement sur le PC de l'opérateur}
+\begin{verbatim}
+source /opt/ros/jazzy/setup.bash
 ros2 run rqt_image_view rqt_image_view
 \end{verbatim}
-Sélectionnez le topic \texttt{/agri\_debug} pour visualiser l'algorithme OpenCV en direct.
+Sélectionnez le topic \texttt{/agri\_debug} dans le menu déroulant pour visualiser l'image annotée. Le flux est émis à un rythme réduit (1 trame sur 15) pour économiser la bande passante Wi-Fi.
 
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.7\textwidth]{images/placeholder_rqt_view.png}
-    \caption{Visualisation RQT Image View de l'Algorithme (Insérer image ici)}
-\end{figure}
+% ============================================================
+\section{Calibration Mécanique de la Sonde}
+
+\subsection{Description}
+Avant la première utilisation, ou après démontage mécanique, il est nécessaire de calibrer la course maximale de la sonde à vis pour éviter de détériorer la mécanique.
+
+\subsection{Procédure}
+\begin{enumerate}
+    \item Suspendez le robot ou placez-le sur une surface sans obstacles sous la sonde.
+    \item Connectez-vous en SSH au Raspberry Pi.
+    \item Lancez le script de calibration :
+\begin{verbatim}
+python3 python_control/calibrate_probe.py
+\end{verbatim}
+    \item Entrez un nombre de pas positif (ex. \texttt{50}) pour descendre la sonde, ou négatif (ex. \texttt{-50}) pour la remonter.
+    \item Notez la valeur affichée comme « distance relative comptée » lorsque la sonde atteint sa butée inférieure. Cette valeur correspond au nombre de pas total du course mécanique.
+    \item Appuyez sur \texttt{Ctrl+C} ou entrez \texttt{0} pour quitter.
+\end{enumerate}
+
+Utilisez de petites valeurs (10 à 20 pas) lorsque vous approchez de la butée mécanique pour éviter de forcer le moteur.
+
+% ============================================================
+\section{Consignes de Sécurité}
+
+\begin{itemize}
+    \item Ne jamais lancer le robot en espace confiné sans vérifier que le LIDAR est actif et fonctionnel.
+    \item Toujours couper l'alimentation des batteries LiPo après utilisation pour éviter la décharge profonde.
+    \item Ne pas approcher les mains du mécanisme de la sonde lorsqu'une séquence de récolte est en cours.
+    \item En cas de comportement anormal, couper l'interrupteur de la batterie moteur immédiatement. Le Watchdog Arduino arrêtera les moteurs dans la seconde.
+    \item Ne pas exposer les batteries LiPo à une chaleur excessive ou à des chocs mécaniques.
+\end{itemize}
+
+% ============================================================
+\section{Résolution de Problèmes Courants}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Symptôme} & \textbf{Solution} \\
+\midrule
+Le robot ne démarre pas sa mission & Vérifiez que l'Arduino est connecté via USB et que le port \texttt{/dev/ttyACM0} est accessible. Consultez les logs du nœud. \\
+\addlinespace
+Le robot ne suit pas la ligne & Vérifiez l'éclairage ambiant. Ajustez les seuils HSV (\texttt{line\_v\_lo}) dans le lancement ROS 2. \\
+\addlinespace
+Arrêt intempestif à chaque démarrage & Le LIDAR détecte un obstacle. Vérifiez que la zone frontale est dégagée sur au moins 20 cm. \\
+\addlinespace
+La sonde ne descend pas & Vérifiez que la batterie LiPo 2200mAh est branchée et que le pont en H L298N est actif (LED allumée). \\
+\addlinespace
+Pas d'image sur \texttt{/agri\_debug} & Vérifiez que le \texttt{ROS\_DOMAIN\_ID} est identique sur le Pi et sur le PC. \\
+\addlinespace
+Erreur \texttt{Serial: No device} & L'Arduino n'est pas détecté. Reconnectez le câble USB. Vérifiez avec \texttt{ls /dev/ttyACM*}. \\
+\bottomrule
+\end{tabularx}
+\caption{Problèmes courants et solutions.}
+\end{table}
 
 \end{document}

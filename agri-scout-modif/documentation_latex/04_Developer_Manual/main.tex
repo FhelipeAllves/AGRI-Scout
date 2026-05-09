@@ -1,6 +1,4 @@
 \documentclass [12pt, a4paper]{article}
-
-% Acentos e Francês
 \usepackage[utf8]{inputenc}
 \usepackage[french]{babel}
 \usepackage{wrapfig}
@@ -47,7 +45,7 @@ Le Developer Manual décrit l'architecture mécanique, électronique et logiciel
 L'Agri-Scout est propulsé par ROS 2 Jazzy, OpenCV et um pont de communication dynamique avec Arduino.
 
 \section{Architecture Mécanique}
-Comme défini dans le \textit{Hardware Maintenance Manual}, des supports personnalisés ont été conçus à partir de la structure de base du robot pour accueillir les capteurs et l'électronique. Le robot étant destiné à opérer en milieu agricole, il est équipé d'un capteur pour extraire les paramètres du sol. Pour que le capteur puisse fonctionner, il doit pénétrer le terrain ; à cet effet, une sonde à vis a été conçue et couplée au châssis du robot. La sonde est actionnée par un moteur pas à pas NEMA. Compte tenu de la complexité de la conception et de la fabrication de la sonde, la partie mécanique du robot a été divisée en deux parties principales : la conception/fabrication de la sonde et les autres supports du robot.
+Comme défini dans le Hardware Maintenance Manual, des supports personnalisés ont été conçus à partir de la structure de base du robot pour accueillir les capteurs et l'électronique. Le robot étant destiné à opérer en milieu agricole, il est équipé d'un capteur pour extraire les paramètres du sol. Pour que le capteur puisse fonctionner, il doit pénétrer le terrain ; à cet effet, une sonde à vis a été conçue et couplée au châssis du robot. La sonde est actionnée par un moteur pas à pas NEMA. Compte tenu de la complexité de la conception et de la fabrication de la sonde, la partie mécanique du robot a été divisée en deux parties principales : la conception/fabrication de la sonde et les autres supports du robot.
 
 \subsection{Châssis de base du robot}
 
@@ -61,6 +59,12 @@ La structure de base du robot est présentée dans la figure \ref{fig:chassi}, a
 \end{figure}
 
 Comme de nombreux composants sont couplés au robot, il a été nécessaire d'ajouter un étage supplémentaire. Une plaque d'aluminium a été choisie pour constituer le second étage du robot, en raison de sa facilité de perçage et de la résistance du matériau. La plaque a été découpée en laboratoire selon les dimensions du châssis. Des supports métalliques ont été utilisés pour fixer la plaque au châssis. La figure \ref{fig:chassi_final} montre le châssis finalisé et prêt à recevoir les composants.
+
+Le châssis est organisé en deux niveaux :
+\begin{itemize}
+    \item Niveau inférieur (châssis d'origine) : moteurs de traction, ESC, câblage de puissance.
+    \item Niveau supérieur (plaque aluminium) : Raspberry Pi, Arduino, pont en H, batteries, capteurs.
+\end{itemize}
 
 \begin{figure}[H]
     \centering
@@ -179,7 +183,7 @@ La webcam est une caméra USB standard, utilisée comme capteur de vision princi
     \label{fig:webcam_photo}
 \end{figure}
 
-Il est important de noter que la connexion électrique entre l'Arduino, os ESC et le pont en H peut être vérifiée dans le code du fichier \texttt{main\_firmware.ino}. Après avoir accédé au Raspberry Pi en suivant les instructions du \textit{Quick Start Guide}, le code est disponible dans le répertoire :
+Il est important de noter que la connexion électrique entre l'Arduino, os ESC et le pont en H peut être vérifiée dans le code du fichier \texttt{main\_firmware.ino}. Après avoir accédé au Raspberry Pi en suivant les instructions du Quick Start Guide, le code est disponible dans le répertoire :
 \begin{verbatim}
 ~/AGRI-Scout_Modif/arduino_firmware/main_firmware/main_firmware.ino
 \end{verbatim}
@@ -242,19 +246,19 @@ Le logiciel du robot est organisé autour d'un nœud ROS 2 central écrit en Pyt
 \subsection{Nœud Principal : \texttt{agri\_line\_follower.py}}
 Ce nœud agit comme le « cerveau » du robot en mission autonome. Il intègre trois flux asynchrones : la caméra V4L2 (topic \texttt{/image\_raw}), le scanner LIDAR (topic \texttt{/scan}) et la liaison série UART vers l'Arduino. La machine à états interne comporte deux modes principaux :
 \begin{itemize}
-    \item \textbf{FOLLOWING} : suivi de ligne blanche par vision, avec un correcteur PD pour le guidage latéral.
-    \item \textbf{HARVESTING} : séquence automatique de descente, collecte de données et remontée de la sonde.
+    \item FOLLOWING : suivi de ligne blanche par vision, avec un correcteur PD pour le guidage latéral.
+    \item HARVESTING : séquence automatique de descente, collecte de données et remontée de la sonde.
 \end{itemize}
 Afin d'éviter une surcharge du Raspberry Pi, plusieurs contraintes de performance sont appliquées :
 \begin{itemize}
-    \item \textbf{OpenCV Mono-Core} : \texttt{cv2.setNumThreads(1)} limite l'utilisation à un seul cœur CPU.
-    \item \textbf{Downscaling} : l'image est redimensionnée à 160×120 pixels avant traitement.
-    \item \textbf{Throttling} : les trames de débogage publiées sur \texttt{/agri\_debug} sont émises à raison d'une trame sur 15.
+    \item OpenCV Mono-Core : \texttt{cv2.setNumThreads(1)} limite l'utilisation à un seul cœur CPU.
+    \item Downscaling : l'image est redimensionnée à 160×120 pixels avant traitement.
+    \item Throttling : les trames de débogage publiées sur \texttt{/agri\_debug} sont émises à raison d'une trame sur 15.
 \end{itemize}
-Un \textit{watchdog} interne surveille la réception des images et ordonne l'arrêt d'urgence si aucune donnée n'est reçue pendant plus de 15 secondes. La récolte périodique automatique est également déclenchée toutes les 30 secondes via un timer ROS 2.
+Un watchdog interne surveille la réception des images et ordonne l'arrêt d'urgence si aucune donnée n'est reçue pendant plus de 15 secondes. La récolte périodique automatique est également déclenchée toutes les 30 secondes via un timer ROS 2.
 
 \subsection{Nœud de Démonstration : \texttt{agri\_demo\_hunter.py}}
-Ce nœud alternatif a été développé pour les démonstrations. Au lieu de suivre une ligne, il recherche un objet coloré (par défaut rouge/orange) dans le champ de vision de la caméra et s'en approche. Il dispose d'une machine à états similaire (\textit{SEARCHING}, \textit{TRACKING}, \textit{HARVESTING}) et utilise également le LIDAR pour la détection d'obstacles. Il peut être lancé manuellement à la place de \texttt{agri\_line\_follower.py}.
+Ce nœud alternatif a été développé pour les démonstrations. Au lieu de suivre une ligne, il recherche un objet coloré (par défaut rouge/orange) dans le champ de vision de la caméra et s'en approche. Il dispose d'une machine à états similaire (SEARCHING, TRACKING, HARVESTING) et utilise également le LIDAR pour la détection d'obstacles. Il peut être lancé manuellement à la place de \texttt{agri\_line\_follower.py}.
 
 \subsection{Téléopération : \texttt{ros2\_teleop.py}}
 Ce nœud permet de contrôler le robot manuellement depuis un terminal via le clavier (touches W/A/S/D pour les déplacements, I/K pour la sonde, Espace pour l'arrêt). Les commandes sont publiées sur le topic ROS 2 \texttt{agri\_commands}. Il est utile pour les phases de test et de réglage.
@@ -266,7 +270,7 @@ Script autonome (sans ROS 2) qui communique avec le capteur de sol NPK via le pr
 Utilitaire interactif permettant de calibrer mécaniquement le rail de la sonde. Il envoie des commandes de pas au stepper via la liaison série et affiche la position cumulée (en pas), ce qui permet de déterminer le course maximale sans risque de détériorer la mécanique.
 
 \subsection{Fichiers de Lancement ROS 2}
-Deux fichiers de lancement (\textit{launch files}) orchestrent le démarrage du système :
+Deux fichiers de lancement (launch files) orchestrent le démarrage du système :
 \begin{itemize}
     \item \texttt{demo.launch.py} — lance simultanément le nœud de caméra V4L2, le nœud LIDAR RPLiDAR et le nœud de suivi de ligne (\texttt{agri\_line\_follower.py}).
     \item \texttt{calibration.launch.py} — lance uniquement la caméra pour les procédures de calibration de l'optique.
@@ -280,7 +284,7 @@ Dans \texttt{main\_firmware.ino}, l'Arduino agit comme un esclave de bas niveau 
     \item \texttt{D} / \texttt{U} : descente / remontée de la sonde (stepper)
     \item \texttt{X} : arrêt complet
 \end{itemize}
-Un mécanisme de \textit{watchdog} matériel coupe les moteurs si aucune commande n'est reçue pendant plus d'une seconde, garantissant la sécurité en cas de perte de communication. Pour migrer vers une commande différentielle directe et éviter le freinage ABS des ESC RC, le Python envoie désormais des valeurs de vitesse absolues, sans jamais inverser brusquement le sens.
+Un mécanisme de watchdog matériel coupe les moteurs si aucune commande n'est reçue pendant plus d'une seconde, garantissant la sécurité en cas de perte de communication. Pour migrer vers une commande différentielle directe et éviter le freinage ABS des ESC RC, le Python envoie désormais des valeurs de vitesse absolues, sans jamais inverser brusquement le sens.
 
 \section{Compilation et Modification}
 Pour recompiler le nœud ROS 2 :

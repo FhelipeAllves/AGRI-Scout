@@ -1,11 +1,28 @@
 \section{Pistes d'Amélioration et Perspectives Futures}
 \label{sec:ameliorations}
 
-Cette section s'adresse aux futurs développeurs du projet AGRI-Scout. Les axes proposés sont des orientations générales ; le choix du matériel et des bibliothèques devra être adapté au budget et aux équipements disponibles à l'ENSTA au moment de la reprise du projet.
+Cette section s'adresse aux futurs développeurs du projet AGRI-Scout. Les axes proposés sont classés par ordre croissant de difficulté et de complexité. Le choix du matériel et des bibliothèques devra être adapté au budget et aux équipements disponibles à l'ENSTA au moment de la reprise du projet.
 
-\subsection{Axe 1 : Upgrade Matériel et Navigation Avancée}
+% ----------------------------------------------------------
+\subsection{Axe 1 : Refonte Mécanique et Châssis}
 
-La principale limitation de l'architecture actuelle est la puissance de calcul de la Raspberry Pi 4, insuffisante pour des algorithmes de vision ou de planification complexes. Remplacer l'ordinateur de bord par une plateforme plus puissante, comme une NVIDIA Jetson \cite{jetson_orin} ou un Arduino UNO Q 4GB (carte Arduino intégrant processeur et capacités d'IA dans un module compact, alternative économique à environ 60~€), permettrait d'envisager l'intégration de Nav2 \cite{ros2_nav2} avec un algorithme A* pour la navigation autonome en champ.
+Le point de départ le plus accessible pour les prochains groupes est une intervention purement mécanique, sans modifier le logiciel existant. Le châssis de base actuel est un châssis RC générique dont les moteurs posent des problèmes récurrents de décalibration : la symétrie de puissance entre les roues gauche et droite se dégrade au fil du temps, rendant le suivi de ligne de moins en moins précis.
+
+L'objectif de cet axe serait de remodeler le châssis de base et l'ensemble du système de roues pour obtenir un robot visuellement plus propre, mieux organisé et plus fiable mécaniquement. Un système de propulsion plus tolérant aux défaillances — par exemple des moteurs à encodeurs qui permettent un retour de position réel — résoudrait directement le problème de décalibration. Cette refonte permettrait aux étudiants de travailler sur différentes pièces mécaniques et matériaux, de concevoir et imprimer de nouvelles pièces en 3D, et, une fois la mécanique stabilisée, de garantir un fonctionnement optimal des algorithmes de navigation déjà existants sans toucher au code.
+
+\noindent Compétences développées : CAO (Autodesk Inventor / Fusion 360), impression 3D, intégration mécanique-électronique, caractérisation de moteurs DC.
+
+\noindent Ressources utiles :
+\begin{itemize}
+    \item Encodeurs et moteurs DC à encodeur (exemple : Pololu) : \url{https://www.pololu.com/category/12/motors-solenoids-driver-boards}
+    \item Modeles 3D pour la robotique : \url{https://grabcad.com/library?categories=robotics}
+    \item Comparatif châssis robotiques : \href{https://www.fdatabot.com/top-10-mobile-robot-chassis-compared-types-features-selection-guide/}{Lien vers fdatabot.com}
+\end{itemize}
+
+% ----------------------------------------------------------
+\subsection{Axe 2 : Upgrade Matériel et Navigation Avancée}
+
+La principale limitation de l'architecture actuelle est la puissance de calcul de la Raspberry Pi 4, insuffisante pour des algorithmes de vision ou de planification complexes. Remplacer l'ordinateur de bord par une plateforme plus puissante, comme une NVIDIA Jetson ou un Arduino UNO Q 4GB (carte Arduino intégrant processeur et capacités d'IA dans un module compact, alternative économique à environ 60~€), permettrait d'envisager l'intégration de Nav2 \cite{ros2_nav2} avec un algorithme A* pour la navigation autonome en champ.
 
 \noindent Ressources utiles :
 \begin{itemize}
@@ -15,17 +32,7 @@ La principale limitation de l'architecture actuelle est la puissance de calcul d
     \item Algorithme A* expliqué visuellement : \url{https://www.redblobgames.com/pathfinding/a-star/introduction.html}
 \end{itemize}
 
-\subsection{Axe 2 : Navigation GPS RTK et Missions par Points de Passage}
-
-L'intégration d'un récepteur GPS RTK permettrait une localisation absolue centimétrique, ouvrant la voie à des missions géoréférencées par waypoints : l'opérateur définirait à l'avance les positions d'échantillonnage et le robot naviguerait automatiquement entre ces points en générant une carte de fertilité de la parcelle. Un filtre de Kalman étendu, disponible via le package ROS 2 \texttt{robot\_localization}, permettrait de fusionner GPS, IMU et odométrie pour une localisation robuste.
-
-\noindent Ressources utiles :
-\begin{itemize}
-    \item Package ROS 2 \texttt{robot\_localization} (EKF) : \url{https://docs.ros.org/en/noetic/api/robot_localization/html/index.html}
-    \item Introduction au filtre de Kalman --- tutoriel visuel : \url{https://www.bzarg.com/p/how-a-kalman-filter-works-in-pictures/}
-    \item Guide GPS RTK open-source (ZED-F9P) : \url{https://learn.sparkfun.com/tutorials/gps-rtk2-hookup-guide}
-\end{itemize}
-
+% ----------------------------------------------------------
 \subsection{Axe 3 : Détection de Végétation et de Pestes par YOLO}
 
 Cet axe reprend l'objectif initial du projet, retiré du périmètre par contrainte de temps et de calcul : utiliser un modèle YOLO entraîné sur des images agricoles pour identifier l'état des cultures (plantes malades, stress hydrique, infestations), détecter des fruits mûrs ou légumes prêts à la récolte, et classifier le type de culture pour adapter les seuils d'analyse NPK. Des bases de données annotées existent librement en ligne pour entraîner ou affiner le modèle.
@@ -36,4 +43,20 @@ Cet axe reprend l'objectif initial du projet, retiré du périmètre par contrai
     \item Dataset PlantVillage (maladies de plantes) : \url{https://www.kaggle.com/datasets/emmarex/plantdisease}
     \item Datasets agricoles annotés (Roboflow Universe) : \url{https://universe.roboflow.com/search?q=pest+detection+agriculture}
     \item Tutoriel entraînement YOLO sur dataset personnalisé : \url{https://docs.ultralytics.com/modes/train/}
+\end{itemize}
+
+% ----------------------------------------------------------
+\subsection{Axe 4 : Navigation GPS RTK et Missions par Points de Passage}
+
+L'intégration d'un récepteur GPS RTK représente l'axe le plus ambitieux et le plus complexe techniquement, mais aussi le plus coûteux en termes d'équipement. Un GPS RTK permettrait une localisation absolue de précision décimétrique à centimétrique, ouvrant la voie à des missions géoréférencées par waypoints : l'opérateur définirait à l'avance les positions d'échantillonnage sur une carte et le robot naviguerait automatiquement entre ces points, générant une carte de fertilité géoréférencée de la parcelle.
+
+La principale contrainte de cet axe est le coût du matériel : un récepteur GPS RTK de qualité professionnelle représente un investissement significatif qui dépasse généralement le budget d'un projet étudiant. Cependant, une précision de l'ordre du mètre (voire inférieure) serait déjà suffisante pour réaliser des missions agricoles intéressantes et des études approfondies. La faisabilité de cet axe dépendra donc directement de la disponibilité d'un équipement compatible au sein de l'ENSTA ou d'un prêt institutionnel.
+
+Sur le plan logiciel, un filtre de Kalman étendu, disponible via le package ROS 2 \texttt{robot\_localization}, permettrait de fusionner les données GPS, IMU et odométrie pour une localisation robuste en conditions réelles.
+
+\noindent Ressources utiles :
+\begin{itemize}
+    \item Package ROS 2 \texttt{robot\_localization} (EKF) : \url{https://docs.ros.org/en/noetic/api/robot_localization/html/index.html}
+    \item Introduction au filtre de Kalman --- tutoriel visuel : \url{https://www.bzarg.com/p/how-a-kalman-filter-works-in-pictures/}
+    \item Guide GPS RTK open-source (ZED-F9P, $\sim$200~€) : \url{https://learn.sparkfun.com/tutorials/gps-rtk2-hookup-guide}
 \end{itemize}

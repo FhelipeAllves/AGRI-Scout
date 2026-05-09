@@ -1,6 +1,6 @@
 \documentclass [12pt, a4paper]{article}
 
-% Acentos e Francês
+% Acentos e Français
 \usepackage[utf8]{inputenc}
 \usepackage[french]{babel}
 \usepackage{wrapfig}
@@ -17,15 +17,16 @@
 \usepackage{upquote}
 \usepackage{amsmath}
 \usepackage{hyperref}
+\usepackage{enumitem}
 
 % Margens
 \usepackage[top=3cm, bottom=3cm, left=3cm, right=3cm]{geometry}
 % Fonte
 \usepackage[T1]{fontenc}
-\usepackage{fancyhdr} 
-\pagestyle{fancy}     
+\usepackage{fancyhdr}
+\pagestyle{fancy}
 
-\fancyhf{}             
+\fancyhf{}
 \lhead{UE 3.4 - Projet \hfill \thepage}
 
 \begin{document}
@@ -36,45 +37,417 @@
 % Sumário
 \renewcommand{\contentsname}{\centering Sommaire}
 \tableofcontents
-\thispagestyle{empty} 
-\setcounter{page}{0} 
+\thispagestyle{empty}
+\setcounter{page}{0}
 
 \newpage
 \section{Introduction}
-Ce \textbf{Hardware Maintenance Manual} est le document technique pour le démontage, la réparation et la fabrication des pièces mécaniques du robot Agri-Scout. La majeure partie de la structure a été conceptualisée en impression 3D de zéro par l'équipe.
+Ce Hardware Maintenance Manual est le document de référence technique pour la maintenance, le démontage, le remplacement de pièces et le débogage matériel du robot Agri-Scout. Il s'adresse à un technicien souhaitant intervenir sur la mécanique ou l'électronique du robot après une panne ou une usure normale.
 
-\section{Conception Mécanique 3D}
-Nous avons conçu plusieurs éléments critiques pour assurer l'intégration des capteurs et la mobilité de la sonde.
+La majeure partie de la structure mécanique a été conçue et fabriquée par l'équipe : les pièces en plastique sont imprimées en 3D (FDM, PLA) à partir de fichiers CAO Autodesk Inventor, et les supports métalliques sont découpés et percés en laboratoire.
 
-\subsection{Système de Sonde (Le Levier)}
-Le mécanisme de la sonde est l'un des plus grands défis mécaniques du projet.
-Il a fallu concevoir une "alavanca" (levier) en impression 3D qui relie le moteur pas-à-pas à la vis sans fin de pénétration du sol. L'effort en couple est très élevé, la conception 3D a été renforcée autour du pivot.
+Avant toute intervention : coupez l'interrupteur des batteries LiPo et débranchez la Powerbank du Raspberry Pi.
+
+% ============================================================
+\section{Vue d'Ensemble du Robot}
+
+La figure \ref{fig:robot_vue} présente le robot Agri-Scout assemblé, prêt pour une mission.
+
 \begin{figure}[H]
     \centering
-    % \includegraphics[width=0.6\textwidth]{images/placeholder_3d_lever.png}
-    \caption{Rendu 3D du mécanisme de levier pour la sonde (Insérer image CAO ici)}
+    \includegraphics[width=0.65\textwidth]{images/robot.jpeg}
+    \caption{Robot Agri-Scout assemblé.}
+    \label{fig:robot_vue}
 \end{figure}
-Pour remplacer ce levier : dévissez les fixations centrales, séparez l'axe du moteur et glissez la nouvelle pièce.
 
-\subsection{Supports Moteur et Capteurs}
-Les éléments suivants ont été également conçus en interne :
+Le châssis est organisé en deux niveaux :
 \begin{itemize}
-    \item \textbf{Support Moteur Sonde} : Encaisse les forces de torsion lors de la pénétration (11000 pas) dans un sol dense.
-    \item \textbf{Support Batterie} : Conçu pour isoler la Powerbank et la batterie LiPo des autres circuits sensibles.
-    \item \textbf{Support LiDAR / IMU} : Plateforme surélevée assurant un champ de vision à 360 degrés sans obstruction par les câbles.
+    \item Niveau inférieur (châssis d'origine) : moteurs de traction, ESC, câblage de puissance.
+    \item Niveau supérieur (plaque aluminium) : Raspberry Pi, Arduino, pont en H, batteries, capteurs.
 \end{itemize}
 
 \begin{figure}[H]
     \centering
-    % \includegraphics[width=0.6\textwidth]{images/placeholder_3d_supports.png}
-    \caption{Support du LiDAR et des Batteries (Insérer images CAO ici)}
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/chassi.jpeg}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/chassi2.jpeg}
+    \end{minipage}
+    \caption{Châssis de base (gauche) et châssis avec second étage aluminium (droite).}
+    \label{fig:chassis}
 \end{figure}
 
-\section{Débogage Matériel Courant}
-\subsection{Roues folles au démarrage (GND Flottant)}
-Si les roues gauches ou droites tournent seules dès l'allumage : cela indique une absence de masse (GND) commune entre le Raspberry Pi et l'Arduino/ESC. Vérifiez la liaison physique du câble GND de l'ESC vers l'Arduino.
+% ============================================================
+\section{Référence des Composants}
 
-\subsection{LiDAR muet}
-Si le LiDAR tourne physiquement mais n'envoie aucune donnée, assurez-vous que le port \texttt{/dev/ttyUSB0} est bien assigné. Le mode \texttt{BEST\_EFFORT} (QoS) est requis.
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Composant} & \textbf{Référence / Modèle} & \textbf{Remarques} \\
+\midrule
+Microcontrôleur principal & Raspberry Pi 4 Model B (4 Go) & Système Ubuntu 22.04, ROS 2 Jazzy \\
+Microcontrôleur secondaire & Arduino UNO R3 & Firmware \texttt{main\_firmware.ino} \\
+Moteurs de traction & Moteurs DC brushed (4×) & Contrôlés par 2 ESC RC \\
+ESC des roues & ESC RC standard (2×) & Pins 9 et 10 de l'Arduino \\
+Moteur sonde & NEMA 17 (moteur pas à pas) & 200 pas/tour, contrôlé via L298N \\
+Pont en H (sonde) & L298N & Pins 4, 5, 6, 7 de l'Arduino \\
+LIDAR & Slamtec RPLiDAR A1 & USB, 115200 bauds, \texttt{/dev/ttyUSB0} \\
+Caméra & Webcam USB V4L2 & 320×240 MJPEG, \texttt{/dev/video0} \\
+IMU & MPU-6050 & I2C, non exploité en mission v1 \\
+Capteur sol & Capteur NPK 8 paramètres & RS485/Modbus RTU, \texttt{/dev/ttyUSB1} \\
+Batterie moteurs & LiPo 5000 mAh (11.1 V, 3S) & Circuit de puissance des roues \\
+Batterie sonde & LiPo 2200 mAh (11.1 V, 3S) & Alimentation pont en H L298N \\
+Alimentation Raspberry Pi & Powerbank USB-C 5 V & Isolation du bruit de puissance \\
+\bottomrule
+\end{tabularx}
+\caption{Référence des composants principaux de l'Agri-Scout.}
+\label{tab:composants}
+\end{table}
+
+% ============================================================
+\section{Système d'Alimentation}
+
+\subsection{Architecture électrique}
+Le robot utilise trois sources d'alimentation distinctes et indépendantes pour isoler les circuits sensibles des perturbations des moteurs :
+
+\begin{itemize}
+    \item LiPo 5000 mAh (11,1 V) : alimente les moteurs de traction via les ESC.
+    \item LiPo 2200 mAh (11,1 V) : alimente le pont en H L298N qui contrôle le moteur pas à pas de la sonde.
+    \item Powerbank USB-C : alimente uniquement le Raspberry Pi (5 V), évitant les chutes de tension (brown-outs) lors des pics de courant moteur.
+\end{itemize}
+
+Le câble USB entre le Raspberry Pi et l'Arduino a son fil d'alimentation rouge (+5 V) coupé. Seuls le GND et les données sont connectés. La masse commune (GND) entre tous les éléments est impérative pour le bon fonctionnement des communications.
+
+\subsection{Démontage et remplacement des batteries}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bat5.jpeg}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bat5_2.jpeg}
+    \end{minipage}
+    \caption{Batterie LiPo 5000 mAh et son support de fixation.}
+    \label{fig:bat5}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bat2_2.jpeg}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bat22.jpeg}
+    \end{minipage}
+    \caption{Batterie LiPo 2200 mAh et son emplacement.}
+    \label{fig:bat22}
+\end{figure}
+
+Pour remplacer une batterie LiPo :
+\begin{enumerate}
+    \item Coupez l'interrupteur correspondant.
+    \item Débranchez le connecteur XT60 (tirez droit, ne tordez pas).
+    \item Desserrez les deux vis du support imprimé en 3D.
+    \item Glissez la batterie hors de son support.
+    \item Insérez la nouvelle batterie et inversez la procédure.
+\end{enumerate}
+
+\subsection{Interrupteur de puissance}
+
+L'interrupteur (figure \ref{fig:interrupteur}) coupe uniquement l'alimentation du circuit de puissance des moteurs (LiPo 5000 mAh). La Powerbank du Raspberry Pi est indépendante et doit être débranchée séparément.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{images/interrup.jpeg}
+    \caption{Interrupteur de puissance des moteurs de traction.}
+    \label{fig:interrupteur}
+\end{figure}
+
+% ============================================================
+\section{Électronique : Démontage et Remplacement}
+
+\subsection{Raspberry Pi et Arduino}
+
+Le Raspberry Pi est fixé sous le châssis supérieur, et l'Arduino UNO est fixé dessus. Ils sont reliés par un câble USB dont le fil +5 V a été sectionné.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/pi_conect.jpeg}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/usbc.jpeg}
+    \end{minipage}
+    \caption{Raspberry Pi fixé sous le châssis supérieur et connecteur USB-C de la Powerbank.}
+    \label{fig:pi_arduino}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth, angle=-90]{images/pi_ino.jpeg}
+    \caption{Vue de la disposition du Raspberry Pi et de l'Arduino sur le châssis.}
+    \label{fig:pi_ino}
+\end{figure}
+
+Pour déposer le Raspberry Pi :
+\begin{enumerate}
+    \item Débranchez la Powerbank USB-C.
+    \item Déconnectez le câble USB vers l'Arduino.
+    \item Retirez les 4 vis M3 de fixation au châssis.
+\end{enumerate}
+
+Pour déposer l'Arduino :
+\begin{enumerate}
+    \item Notez la connexion de chaque broche avant de déconnecter (ou photographiez).
+    \item Débranchez le câble USB vers le Raspberry Pi.
+    \item Retirez le câble des ESC (pins 9, 10) et du pont en H (pins 4, 5, 6, 7).
+    \item Retirez les vis de fixation.
+\end{enumerate}
+
+Lors du remplacement de l'Arduino, il est impératif de re-téléverser le firmware \texttt{main\_firmware.ino} (voir Developer Manual, section Compilation et Modification).
+
+\subsection{LIDAR RPLiDAR A1}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth, angle=-90]{images/IMG_LIDAR.jpeg}
+    \caption{RPLiDAR A1 monté sur le support d'élévation.}
+    \label{fig:lidar_hw}
+\end{figure}
+
+Le LIDAR est fixé sur un support rotatif imprimé en 3D (figure \ref{fig:support_lidar}) qui permet de régler son orientation.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{images/imu_lidar.png}
+    \caption{Support de fixation rotatif pour le LIDAR et l'IMU.}
+    \label{fig:support_lidar}
+\end{figure}
+
+Pour déposer le LIDAR :
+\begin{enumerate}
+    \item Débranchez le câble USB du Raspberry Pi.
+    \item Desserrez la vis centrale du support rotatif.
+    \item Soulevez le LIDAR verticalement hors de son logement.
+\end{enumerate}
+
+\subsection{IMU (MPU-6050)}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth, angle=-90]{images/IMG_IMU.jpeg}
+    \caption{Module IMU MPU-6050 fixé sur le support du LIDAR.}
+    \label{fig:imu_hw}
+\end{figure}
+
+L'IMU est connectée au Raspberry Pi via le bus I2C (SDA/SCL + GND + 3.3 V). Pour la remplacer, débranchez les 4 fils dupont et dévissez le module de son support.
+
+\subsection{Webcam USB}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth, angle=-90]{images/IMG_WEBCAM.jpeg}
+    \caption{Webcam USB montée sur le châssis.}
+    \label{fig:webcam_hw}
+\end{figure}
+
+La webcam est montée sur le châssis avant et reliée au Raspberry Pi par USB. Elle est fixée par une vis M3. En cas de remplacement, assurez-vous que le nouveau modèle est compatible V4L2 (\texttt{v4l2-ctl --list-devices} pour vérifier).
+
+% ============================================================
+\section{Mécanique : Pièces Imprimées en 3D}
+
+Toutes les pièces mécaniques ont été conçues avec Autodesk Inventor. Les fichiers source sont disponibles dans le dépôt du projet. En cas de rupture, les pièces peuvent être réimprimées directement (matériau recommandé : PLA, remplissage $\geq$ 40\%).
+
+\subsection{Support d'élévation pour LIDAR et IMU}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{images/elevation.png}
+    \caption{Conception CAO du support d'élévation (LIDAR et IMU).}
+    \label{fig:elevation}
+\end{figure}
+
+Ce support surélevé permet au LIDAR de scanner à 360° sans que les câbles ou le châssis ne bloquent le faisceau. Il se visse directement sur la plaque aluminium du second étage.
+
+\subsection{Support du moteur pas à pas (sonde)}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{images/Sup_motor.png}
+    \caption{Conception CAO du support du moteur NEMA 17.}
+    \label{fig:sup_motor}
+\end{figure}
+
+Ce support encaisse les forces de torsion lors de la pénétration de la sonde dans le sol. En cas de rupture (point de fragilité : l'axe de fixation du moteur), réimprimer avec un remplissage de 60\% minimum.
+
+Pour le remplacement du moteur NEMA 17 :
+\begin{enumerate}
+    \item Coupez l'alimentation de la batterie LiPo 2200 mAh.
+    \item Débranchez les 4 fils du stepper du pont en H L298N.
+    \item Desserrez les 4 vis M3 qui fixent le moteur au support.
+    \item Retirez le moteur et montez le nouveau en vérifiant l'ordre des bobines (A+, A-, B+, B-).
+\end{enumerate}
+
+\subsection{Support inférieur de la sonde}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{images/sup_inf.png}
+    \caption{Conception CAO du support inférieur de la sonde.}
+    \label{fig:sup_inf}
+\end{figure}
+
+\subsection{Support du capteur de sol}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{images/sup_sensor.png}
+    \caption{Conception CAO du support du capteur pédologique.}
+    \label{fig:sup_sensor}
+\end{figure}
+
+\subsection{Sonde à vis finalisée}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/sonda.jpeg}
+    \caption{Sonde à vis assemblée et prête au montage.}
+    \label{fig:sonda}
+\end{figure}
+
+La sonde se monte sur le châssis inférieur. La vis pénètre dans le sol lorsque le moteur pas à pas tourne. En cas d'usure de la vis, elle peut être retirée en desserrant le coupleur qui la relie à l'arbre du moteur.
+
+\subsection{Supports des batteries}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bat_5.png}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bat_22.png}
+    \end{minipage}
+    \caption{Conception CAO des supports des batteries LiPo (5000 mAh à gauche, 2200 mAh à droite).}
+    \label{fig:supports_bat}
+\end{figure}
+
+Ces supports sont fixés sur la plaque aluminium par des vis M3 et maintiennent les batteries même sur terrain accidenté.
+
+% ============================================================
+\section{Débogage Matériel}
+
+\subsection{Roues non contrôlées au démarrage}
+Symptôme : les roues tournent de façon erratique ou ne répondent pas aux commandes.
+
+Causes possibles :
+\begin{itemize}
+    \item GND flottant : absence de masse commune entre le Raspberry Pi, l'Arduino et les ESC. Vérifiez la continuité du fil GND du câble USB (entre Pi et Arduino) et la connexion GND entre l'Arduino et chaque ESC.
+    \item ESC non initialisé : les ESC RC doivent recevoir un signal neutre (90°) avant de répondre. Le firmware envoie ce signal au démarrage ; si l'Arduino n'est pas encore prêt, les ESC resteront en veille. Redémarrez le système.
+    \item Batterie LiPo 5000 mAh insuffisante : une batterie déchargée peut provoquer un comportement imprévisible. Vérifiez la tension avec un voltmètre (minimum 10,5 V pour un pack 3S).
+\end{itemize}
+
+\subsection{LIDAR muet ou absent}
+Symptôme : le LIDAR tourne physiquement mais le topic \texttt{/scan} est vide ou absent.
+
+Procédure de diagnostic :
+\begin{enumerate}
+    \item Vérifiez que le port est correctement assigné :
+\begin{verbatim}
+ls /dev/ttyUSB*
+\end{verbatim}
+    \item Vérifiez les permissions :
+\begin{verbatim}
+sudo chmod 666 /dev/ttyUSB0
+\end{verbatim}
+    \item Relancez le nœud LIDAR et observez les logs :
+\begin{verbatim}
+ros2 run rplidar_ros rplidar_composition \
+  --ros-args -p serial_port:=/dev/ttyUSB0 \
+             -p serial_baudrate:=115200
+\end{verbatim}
+    \item Si le LIDAR est sur \texttt{/dev/ttyUSB1} (conflit avec le capteur sol), échangez les ports USB ou créez des règles \texttt{udev} permanentes.
+\end{enumerate}
+
+\subsection{Arduino non détecté}
+Symptôme : le nœud Python affiche \texttt{Serial: No device found} et s'arrête.
+\begin{enumerate}
+    \item Vérifiez la présence du port :
+\begin{verbatim}
+ls /dev/ttyACM*
+\end{verbatim}
+    \item Vérifiez les permissions :
+\begin{verbatim}
+sudo chmod 666 /dev/ttyACM0
+\end{verbatim}
+    \item Débranchez et rebranchez le câble USB. Le délai de 2 secondes dans le code permet à l'Arduino de finir son reset.
+    \item Si le port reste absent, testez l'Arduino sur un autre PC avec l'IDE Arduino pour confirmer qu'il fonctionne.
+\end{enumerate}
+
+\subsection{Sonde ne descend pas}
+Symptôme : la commande \texttt{D} est envoyée mais aucun mouvement n'est observé.
+\begin{itemize}
+    \item Vérifiez que la batterie LiPo 2200 mAh est connectée et chargée.
+    \item Vérifiez la LED d'état du pont en H L298N : elle doit être allumée.
+    \item Vérifiez les connexions des 4 fils du moteur pas à pas sur les sorties A/B du L298N.
+    \item Testez le moteur manuellement avec \texttt{calibrate\_probe.py} (voir User Manual).
+\end{itemize}
+
+\subsection{Caméra non détectée}
+Symptôme : le nœud \texttt{v4l2\_camera\_node} échoue au démarrage.
+\begin{enumerate}
+    \item Vérifiez la présence du périphérique :
+\begin{verbatim}
+ls /dev/video*
+v4l2-ctl --list-devices
+\end{verbatim}
+    \item Débranchez et rebranchez la webcam USB.
+    \item Si plusieurs caméras sont présentes, précisez le bon périphérique dans le fichier de lancement (\texttt{video\_device: /dev/video0}).
+\end{enumerate}
+
+\subsection{Conflit de ports USB (/dev/ttyUSB0 vs /dev/ttyUSB1)}
+Le LIDAR et le capteur NPK utilisent tous deux une connexion USB série. Leur assignation (\texttt{ttyUSB0} ou \texttt{ttyUSB1}) peut varier selon l'ordre de branchement. Pour fixer les ports de manière permanente, créez des règles \texttt{udev} basées sur le numéro de série USB de chaque appareil :
+\begin{verbatim}
+udevadm info -a -n /dev/ttyUSB0 | grep '{serial}'
+\end{verbatim}
+Puis créez un fichier \texttt{/etc/udev/rules.d/99-agri.rules} avec les règles appropriées.
+
+% ============================================================
+\section{Maintenance Préventive}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Fréquence} & \textbf{Composant} & \textbf{Action} \\
+\midrule
+Avant chaque mission & Batteries LiPo & Vérifier la tension (min 10,5 V pour 3S). \\
+Avant chaque mission & Visserie générale & Vérifier que les vis de fixation ne sont pas desserrées par les vibrations. \\
+Avant chaque mission & Sonde à vis & Vérifier que la vis n'est pas obstruée par de la terre. \\
+Après chaque mission & Sonde et capteur sol & Nettoyer la vis et le capteur NPK avec une brosse sèche. \\
+Toutes les 10 missions & Moteurs de traction & Vérifier l'absence de débris coincés dans les roues. \\
+Toutes les 10 missions & Câblage général & Vérifier l'absence de câbles frottés ou déconnectés. \\
+En cas de chute & Toutes pièces 3D & Inspecter visuellement les supports pour fissures. Réimprimer si nécessaire. \\
+\bottomrule
+\end{tabularx}
+\caption{Tableau de maintenance préventive.}
+\end{table}
 
 \end{document}
