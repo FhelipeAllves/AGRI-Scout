@@ -1,6 +1,0 @@
-\babel@toc {french}{}\relax 
-\contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
-\contentsline {section}{\numberline {2}Comportement Nominal (Mission Agricole)}{1}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Suivi de Ligne}{1}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Détection de Zone d'Analyse (Marqueur Rouge)}{1}{subsection.2.2}%
-\contentsline {section}{\numberline {3}Interface de Suivi (RQT Image View)}{1}{section.3}%

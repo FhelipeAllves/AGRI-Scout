@@ -5,13 +5,13 @@ Cette section s'adresse aux futurs développeurs du projet AGRI-Scout. Les axes 
 
 \subsection{Axe 1 : Upgrade Matériel et Navigation Avancée}
 
-La principale limitation de l'architecture actuelle est la puissance de calcul de la Raspberry Pi 4, insuffisante pour des algorithmes de vision ou de planification complexes. Remplacer l'ordinateur de bord par une plateforme plus puissante, comme une NVIDIA Jetson \cite{jetson_orin} ou un Arduino UNO Q (nouvelle carte Arduino intégrant processeur et capacités d'IA dans un module compact, alternative économique à environ 60~€), permettrait d'envisager l'intégration de Nav2 \cite{ros2_nav2} avec un algorithme A* pour la navigation autonome en champ.
+La principale limitation de l'architecture actuelle est la puissance de calcul de la Raspberry Pi 4, insuffisante pour des algorithmes de vision ou de planification complexes. Remplacer l'ordinateur de bord par une plateforme plus puissante, comme une NVIDIA Jetson \cite{jetson_orin} ou un Arduino UNO Q 4GB (carte Arduino intégrant processeur et capacités d'IA dans un module compact, alternative économique à environ 60~€), permettrait d'envisager l'intégration de Nav2 \cite{ros2_nav2} avec un algorithme A* pour la navigation autonome en champ.
 
 \noindent Ressources utiles :
 \begin{itemize}
     \item NVIDIA Jetson --- portail développeur : \url{https://developer.nvidia.com/embedded/develop/hardware}
-    \item Arduino UNO Q --- page officielle Arduino : \url{https://www.arduino.cc/en/hardware}
-    \item Navigation 2 (Nav2) --- documentation ROS 2 : \url{https://navigation.ros.org/}
+    \item Arduino UNO Q --- page officielle Arduino : \url{https://www.arduino.cc/product-uno-q}
+    \item Navigation 2 (Nav2) --- documentation ROS 2 : \url{https://docs.nav2.org/index.html}
     \item Algorithme A* expliqué visuellement : \url{https://www.redblobgames.com/pathfinding/a-star/introduction.html}
 \end{itemize}
 
@@ -21,7 +21,7 @@ L'intégration d'un récepteur GPS RTK permettrait une localisation absolue cent
 
 \noindent Ressources utiles :
 \begin{itemize}
-    \item Package ROS 2 \texttt{robot\_localization} (EKF) : \url{https://docs.ros.org/en/humble/p/robot_localization/}
+    \item Package ROS 2 \texttt{robot\_localization} (EKF) : \url{https://docs.ros.org/en/noetic/api/robot_localization/html/index.html}
     \item Introduction au filtre de Kalman --- tutoriel visuel : \url{https://www.bzarg.com/p/how-a-kalman-filter-works-in-pictures/}
     \item Guide GPS RTK open-source (ZED-F9P) : \url{https://learn.sparkfun.com/tutorials/gps-rtk2-hookup-guide}
 \end{itemize}

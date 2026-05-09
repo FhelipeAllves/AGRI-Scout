@@ -149,13 +149,43 @@ Le Raspberry Pi et l'Arduino ont été fixés sur le châssis supérieur du robo
     \label{fig:eletronica}
 \end{figure}
 
+\subsection{LIDAR RPLiDAR A1}
+Le LIDAR utilisé est un RPLiDAR A1 de Slamtec. Ce capteur effectue un balayage à 360° à l'aide d'un faisceau laser infrarouge, mesurant les distances aux obstacles environnants avec une précision millimétrique. Il est connecté au Raspberry Pi via USB et communique à un débit de 115200 bauds. Dans le système, il est principalement utilisé comme dispositif de sécurité : le nœud ROS 2 surveille en permanence le secteur frontal (±30°) et déclenche un arrêt d'urgence si un obstacle se trouve à moins de 20 cm. Le LIDAR est monté en hauteur sur le support d'élévation imprimé en 3D afin de maximiser son champ de vue.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{images/IMG_LIDAR.jpeg}
+    \caption{RPLiDAR A1 monté sur le robot.}
+    \label{fig:lidar_photo}
+\end{figure}
+
+\subsection{Centrale Inertielle (IMU)}
+La centrale inertielle (IMU) est un module MPU-6050, qui intègre un accéléromètre 3 axes et un gyroscope 3 axes. Elle est fixée sur le même support rotatif que le LIDAR, permettant d'aligner les référentiels des deux capteurs. Bien que l'IMU ne soit pas encore pleinement exploitée dans la version actuelle du logiciel, elle est intégrée à l'architecture matérielle afin de permettre de futures améliorations, notamment pour la détection d'inclinaison du terrain ou la correction de trajectoire.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{images/IMG_IMU.jpeg}
+    \caption{Module IMU MPU-6050 fixé sur le support du LIDAR.}
+    \label{fig:imu_photo}
+\end{figure}
+
+\subsection{Webcam USB}
+La webcam est une caméra USB standard, utilisée comme capteur de vision principale du robot. Elle est gérée par le pilote ROS 2 \texttt{v4l2\_camera}, qui publie les images sur le topic \texttt{/image\_raw}. La résolution de capture est configurée à 320×240 pixels en format MJPEG, afin de réduire la charge de traitement sur le Raspberry Pi. Le nœud de contrôle redimensionne ensuite chaque trame à 160×120 pixels pour l'analyse par vision par ordinateur (détection de ligne et de marqueurs de récolte).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth, angle=-90]{images/IMG_WEBCAM.jpeg}
+    \caption{Webcam USB montée sur le châssis du robot.}
+    \label{fig:webcam_photo}
+\end{figure}
+
 Il est important de noter que la connexion électrique entre l'Arduino, os ESC et le pont en H peut être vérifiée dans le code du fichier \texttt{main\_firmware.ino}. Après avoir accédé au Raspberry Pi en suivant les instructions du \textit{Quick Start Guide}, le code est disponible dans le répertoire :
 \begin{verbatim}
 ~/AGRI-Scout_Modif/arduino_firmware/main_firmware/main_firmware.ino
 \end{verbatim}
 Le diagramme simplifié de la figure \ref{fig:diagram} présente les connexions électriques entre les composants.
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \begin{tikzpicture}[
         node distance=2cm,
@@ -202,26 +232,55 @@ Le diagramme simplifié de la figure \ref{fig:diagram} présente les connexions 
 \end{figure}
 
 \section{Architecture Logicielle}
-\subsection{Le Nœud de Traitement Python (\texttt{agri\_line\_follower.py})}
-Ce nœud agit comme le "Cerveau" du robot. Il intègre trois flux asynchrones : la caméra V4L2, le scanner LaserScan du RPLiDAR, et le port Série (UART) de l'Arduino.
-Afin d'éviter une surcharge de courant (Brown-out) sur le Raspberry Pi, nous avons imposé plusieurs verrous de performance :
+
+Le logiciel du robot est organisé autour d'un nœud ROS 2 central écrit en Python, d'un firmware Arduino et d'un ensemble de scripts utilitaires. Les fichiers sources sont regroupés dans deux répertoires principaux du dépôt :
 \begin{itemize}
-    \item \textbf{OpenCV Mono-Core} : \texttt{cv2.setNumThreads(1)} force l'algorithme à n'utiliser qu'un seul cœur CPU.
-    \item \textbf{Downscaling Extrême} : L'image native est écrasée à 160x120 pixels, réduisant considérablement la charge mathématique des algorithmes de détection.
-    \item \textbf{Network Throttling} : Les trames envoyées au PC de débogage (\texttt{/agri\_debug}) sont sautées (1 trame sur 15).
+    \item \texttt{python\_control/} — scripts Python (nœuds ROS 2 et utilitaires autonomes)
+    \item \texttt{arduino\_firmware/} — code source Arduino
 \end{itemize}
 
-\subsection{Le Firmware Arduino (Protocol \texttt{M})}
-Dans \texttt{main\_firmware.ino}, l'Arduino agit comme un esclave "Raw PWM".
-Auparavant, le pilotage "Skid-Steer" entraînait un problème critique avec les ESC RC standard : envoyer un ordre de marche arrière sur une roue en marche avant engageait le mode "Freinage ABS", bloquant physiquement le robot.
-\newline
-Nous avons migré vers une architecture de Commande Différentielle Absolue (Commande \texttt{M <PwmGauche> <PwmDroit>}). Le Python envoie désormais les vecteurs de propulsion exacts, évitant de franchir le point mort et neutralisant le freinage indésirable.
+\subsection{Nœud Principal : \texttt{agri\_line\_follower.py}}
+Ce nœud agit comme le « cerveau » du robot en mission autonome. Il intègre trois flux asynchrones : la caméra V4L2 (topic \texttt{/image\_raw}), le scanner LIDAR (topic \texttt{/scan}) et la liaison série UART vers l'Arduino. La machine à états interne comporte deux modes principaux :
+\begin{itemize}
+    \item \textbf{FOLLOWING} : suivi de ligne blanche par vision, avec un correcteur PD pour le guidage latéral.
+    \item \textbf{HARVESTING} : séquence automatique de descente, collecte de données et remontée de la sonde.
+\end{itemize}
+Afin d'éviter une surcharge du Raspberry Pi, plusieurs contraintes de performance sont appliquées :
+\begin{itemize}
+    \item \textbf{OpenCV Mono-Core} : \texttt{cv2.setNumThreads(1)} limite l'utilisation à un seul cœur CPU.
+    \item \textbf{Downscaling} : l'image est redimensionnée à 160×120 pixels avant traitement.
+    \item \textbf{Throttling} : les trames de débogage publiées sur \texttt{/agri\_debug} sont émises à raison d'une trame sur 15.
+\end{itemize}
+Un \textit{watchdog} interne surveille la réception des images et ordonne l'arrêt d'urgence si aucune donnée n'est reçue pendant plus de 15 secondes. La récolte périodique automatique est également déclenchée toutes les 30 secondes via un timer ROS 2.
 
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.7\textwidth]{images/placeholder_arch.png}
-    \caption{Architecture logicielle ROS 2 et Arduino (Insérer rqt\_graph ici).}
-\end{figure}
+\subsection{Nœud de Démonstration : \texttt{agri\_demo\_hunter.py}}
+Ce nœud alternatif a été développé pour les démonstrations. Au lieu de suivre une ligne, il recherche un objet coloré (par défaut rouge/orange) dans le champ de vision de la caméra et s'en approche. Il dispose d'une machine à états similaire (\textit{SEARCHING}, \textit{TRACKING}, \textit{HARVESTING}) et utilise également le LIDAR pour la détection d'obstacles. Il peut être lancé manuellement à la place de \texttt{agri\_line\_follower.py}.
+
+\subsection{Téléopération : \texttt{ros2\_teleop.py}}
+Ce nœud permet de contrôler le robot manuellement depuis un terminal via le clavier (touches W/A/S/D pour les déplacements, I/K pour la sonde, Espace pour l'arrêt). Les commandes sont publiées sur le topic ROS 2 \texttt{agri\_commands}. Il est utile pour les phases de test et de réglage.
+
+\subsection{Lecture du Capteur de Sol : \texttt{read\_sensor.py}}
+Script autonome (sans ROS 2) qui communique avec le capteur de sol NPK via le protocole Modbus RTU sur le port série \texttt{/dev/ttyUSB1}. Il lit en continu 8 paramètres (température, humidité, conductivité, salinité, azote, phosphore, potassium, pH) et les affiche dans le terminal. À l'arrêt (Ctrl+C), les données de la session sont sauvegardées dans un fichier CSV.
+
+\subsection{Calibration de la Sonde : \texttt{calibrate\_probe.py}}
+Utilitaire interactif permettant de calibrer mécaniquement le rail de la sonde. Il envoie des commandes de pas au stepper via la liaison série et affiche la position cumulée (en pas), ce qui permet de déterminer le course maximale sans risque de détériorer la mécanique.
+
+\subsection{Fichiers de Lancement ROS 2}
+Deux fichiers de lancement (\textit{launch files}) orchestrent le démarrage du système :
+\begin{itemize}
+    \item \texttt{demo.launch.py} — lance simultanément le nœud de caméra V4L2, le nœud LIDAR RPLiDAR et le nœud de suivi de ligne (\texttt{agri\_line\_follower.py}).
+    \item \texttt{calibration.launch.py} — lance uniquement la caméra pour les procédures de calibration de l'optique.
+\end{itemize}
+
+\subsection{Firmware Arduino (\texttt{main\_firmware.ino})}
+Dans \texttt{main\_firmware.ino}, l'Arduino agit comme un esclave de bas niveau chargé du contrôle temps réel des actionneurs. Il reçoit des paquets binaires sécurisés (protocole avec octet de début \texttt{0x3C}, commande, valeur, checksum XOR, et octet de fin \texttt{0x3E}) et exécute les actions correspondantes :
+\begin{itemize}
+    \item \texttt{F} / \texttt{B} : avance / recul
+    \item \texttt{L} / \texttt{R} : virage gauche / droite
+    \item \texttt{D} / \texttt{U} : descente / remontée de la sonde (stepper)
+    \item \texttt{X} : arrêt complet
+\end{itemize}
+Un mécanisme de \textit{watchdog} matériel coupe les moteurs si aucune commande n'est reçue pendant plus d'une seconde, garantissant la sécurité en cas de perte de communication. Pour migrer vers une commande différentielle directe et éviter le freinage ABS des ESC RC, le Python envoie désormais des valeurs de vitesse absolues, sans jamais inverser brusquement le sens.
 
 \section{Compilation et Modification}
 Pour recompiler le nœud ROS 2 :
