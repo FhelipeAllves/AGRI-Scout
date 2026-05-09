@@ -1,0 +1,39 @@
+\section{Pistes d'Amélioration et Perspectives Futures}
+\label{sec:ameliorations}
+
+Cette section s'adresse aux futurs développeurs du projet AGRI-Scout. Les axes proposés sont des orientations générales ; le choix du matériel et des bibliothèques devra être adapté au budget et aux équipements disponibles à l'ENSTA au moment de la reprise du projet.
+
+\subsection{Axe 1 : Upgrade Matériel et Navigation Avancée}
+
+La principale limitation de l'architecture actuelle est la puissance de calcul de la Raspberry Pi 4, insuffisante pour des algorithmes de vision ou de planification complexes. Remplacer l'ordinateur de bord par une plateforme plus puissante, comme une NVIDIA Jetson \cite{jetson_orin} ou un Arduino UNO Q (nouvelle carte Arduino intégrant processeur et capacités d'IA dans un module compact, alternative économique à environ 60~€), permettrait d'envisager l'intégration de Nav2 \cite{ros2_nav2} avec un algorithme A* pour la navigation autonome en champ.
+
+\noindent Ressources utiles :
+\begin{itemize}
+    \item NVIDIA Jetson --- portail développeur : \url{https://developer.nvidia.com/embedded/develop/hardware}
+    \item Arduino UNO Q --- page officielle Arduino : \url{https://www.arduino.cc/en/hardware}
+    \item Navigation 2 (Nav2) --- documentation ROS 2 : \url{https://navigation.ros.org/}
+    \item Algorithme A* expliqué visuellement : \url{https://www.redblobgames.com/pathfinding/a-star/introduction.html}
+\end{itemize}
+
+\subsection{Axe 2 : Navigation GPS RTK et Missions par Points de Passage}
+
+L'intégration d'un récepteur GPS RTK permettrait une localisation absolue centimétrique, ouvrant la voie à des missions géoréférencées par waypoints : l'opérateur définirait à l'avance les positions d'échantillonnage et le robot naviguerait automatiquement entre ces points en générant une carte de fertilité de la parcelle. Un filtre de Kalman étendu, disponible via le package ROS 2 \texttt{robot\_localization}, permettrait de fusionner GPS, IMU et odométrie pour une localisation robuste.
+
+\noindent Ressources utiles :
+\begin{itemize}
+    \item Package ROS 2 \texttt{robot\_localization} (EKF) : \url{https://docs.ros.org/en/humble/p/robot_localization/}
+    \item Introduction au filtre de Kalman --- tutoriel visuel : \url{https://www.bzarg.com/p/how-a-kalman-filter-works-in-pictures/}
+    \item Guide GPS RTK open-source (ZED-F9P) : \url{https://learn.sparkfun.com/tutorials/gps-rtk2-hookup-guide}
+\end{itemize}
+
+\subsection{Axe 3 : Détection de Végétation et de Pestes par YOLO}
+
+Cet axe reprend l'objectif initial du projet, retiré du périmètre par contrainte de temps et de calcul : utiliser un modèle YOLO entraîné sur des images agricoles pour identifier l'état des cultures (plantes malades, stress hydrique, infestations), détecter des fruits mûrs ou légumes prêts à la récolte, et classifier le type de culture pour adapter les seuils d'analyse NPK. Des bases de données annotées existent librement en ligne pour entraîner ou affiner le modèle.
+
+\noindent Ressources utiles :
+\begin{itemize}
+    \item Documentation officielle Ultralytics YOLO : \url{https://docs.ultralytics.com/}
+    \item Dataset PlantVillage (maladies de plantes) : \url{https://www.kaggle.com/datasets/emmarex/plantdisease}
+    \item Datasets agricoles annotés (Roboflow Universe) : \url{https://universe.roboflow.com/search?q=pest+detection+agriculture}
+    \item Tutoriel entraînement YOLO sur dataset personnalisé : \url{https://docs.ultralytics.com/modes/train/}
+\end{itemize}

@@ -1,0 +1,15 @@
+\section{Introduction}
+
+\subsection{Contexte et Motivation}
+
+Face à la croissance démographique mondiale et à la nécessité de préserver les ressources environnementales, l'agriculture moderne opère une transition vers l'agriculture de précision. Cette approche vise à optimiser les rendements tout en minimisant l'usage d'intrants grâce à une gestion différenciée des parcelles \cite{precision_ag_review}.
+
+La qualité du sol est un facteur déterminant pour la santé des cultures. Traditionnellement, son analyse nécessite un échantillonnage manuel fastidieux et des analyses en laboratoire coûteuses, ce qui limite la fréquence des données disponibles pour l'agriculteur \cite{soil_sensing_review}. L'automatisation de ce processus par la robotique mobile constitue une solution pour permettre un suivi temporel et spatial plus régulier \cite{agri_robotics}.
+
+\subsection{Présentation du Projet AGRI-Scout}
+
+Le projet AGRI-Scout vise à concevoir et prototyper un robot mobile autonome capable de naviguer dans des rangées de cultures et d'effectuer des inspections \textit{in-situ}. Le système intègre une plateforme de locomotion différentielle (\textit{skid-steering}) pilotée par des ESC et supervisée par un Arduino Uno, une Raspberry Pi 4 exécutant ROS 2 Jazzy pour la navigation par vision et l'intégration LiDAR, et une sonde multiparamétrique 8-en-1 (NPK, pH, humidité, température, conductivité électrique) déployée via un mécanisme de perforation conçu et imprimé en 3D.
+
+\subsection{Périmètre de ce Rapport}
+
+Ce rapport d'avancement final n'est pas un document technique architectural. Son objectif est de retracer l'évolution du projet depuis ses ambitions initiales jusqu'à la version livrée : les adaptations imposées par les contraintes du terrain, l'organisation de l'équipe, les solutions explorées qui n'ont pas été retenues, et les pistes d'amélioration pour les futurs développeurs.
