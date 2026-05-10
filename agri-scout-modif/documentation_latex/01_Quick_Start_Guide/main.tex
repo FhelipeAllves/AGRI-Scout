@@ -43,6 +43,24 @@
 \section{Introduction}
 Ce document est le Quick Start Guide. Il contient les étapes essentielles pour assembler, mettre sous tension et démarrer une mission d'inspection autonome avec l'Agri-Scout.
 
+\section{Identification des Composants}
+Avant de commencer, familiarisez-vous avec les éléments clés du robot (voir figure \ref{fig:robot_vue}) :
+\begin{itemize}
+    \item Châssis principal : supporte les 4 roues motrices.
+    \item Interrupteur de puissance : situé à l'arrière, il alimente les moteurs.
+    \item Câbles d'alimentation : connecteurs XT60 pour les batteries LiPo.
+    \item Capteurs : RPLiDAR A1 (au sommet), Webcam USB (à l'avant).
+    \item Sonde d'inspection : mécanisme à vis situé à l'avant pour l'échantillonnage du sol.
+    \item Électronique embarquée : Raspberry Pi 4 et Arduino Uno (sous la plaque supérieure).
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/robot.jpeg}
+    \caption{Aperçu général du robot Agri-Scout.}
+    \label{fig:robot_vue}
+\end{figure}
+
 \section{Prérequis Matériels}
 Pour démarrer le robot, il faut s'assurer d'avoir les éléments suivants :
 \begin{itemize}
@@ -176,11 +194,5 @@ Ce fichier se charge de lancer :
     \item Le nœud du RPLiDAR.
     \item Le contrôleur de vision et de mouvement Python (\texttt{agri\_line\_follower.py}).
 \end{itemize}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\textwidth]{images/robot.jpeg}
-    \caption{Robot prêt au départ.}
-\end{figure}
 
 \end{document}
