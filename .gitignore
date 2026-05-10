@@ -1,9 +1,9 @@
-.aux
-.fls
-.fdb_latexmk
-.gz
-.toc
-# .tex
-.log
-.out
-.synctex.gz
+*.aux
+*.fls
+*.fdb_latexmk
+*.gz
+*.toc
+# *.tex
+*.log
+*.out
+*.synctex.gz

@@ -23,7 +23,7 @@ AGRI-Scout est un robot agricole différentiel autonome à quatre roues motrices
 ## 🌟 Caractéristiques Principales
 
 * **Navigation Autonome :** Suivi de ligne blanche au sol via vision par ordinateur (OpenCV) avec contrôleur PD.
-* **Évitement d'Obstacles :** Surveillance périmétrique en temps réel grâce au RPLiDAR A1 pour prévenir les collisions.
+* **Évitement d'Obstacles :** Surveillance périmétrique en temps réel grâce au RPLiDAR pour prévenir les collisions.
 * **Analyse de Sol Automatisée :** Déploiement mécanique d'une sonde à vis motorisée par un moteur pas-à-pas NEMA 17.
 * **Acquisition de Données :** Capteur industriel RS485 (Modbus RTU) mesurant 8 paramètres vitaux : NPK (Azote, Phosphore, Potassium), pH, Température, Humidité, Conductivité Électrique et Salinité.
 * **Architecture Distribuée :** Prise de décision par Raspberry Pi 4 (ROS 2 Jazzy) et contrôle bas niveau temps réel par Arduino UNO avec un protocole de communication sécurisé (\textit{watchdog}).
@@ -41,10 +41,10 @@ Le robot est structuré sur deux étages pour isoler physiquement l'électroniqu
   * 4x Moteurs DC brushed (Traction, skid-steering)
   * 1x Moteur pas-à-pas NEMA 17 (Sonde)
 * **Capteurs :**
-  * Slamtec RPLiDAR A1 (USB)
+  * RPLiDAR (USB)
   * Webcam USB (V4L2)
   * Capteur de sol NPK 8-en-1 (RS485 vers USB)
-  * SparkFun OpenLog Artemis (I2C)
+  * SparkFun OpenLog Artemis (UART)
 
 ### Système d'Alimentation
 Afin d'éviter les chutes de tension (brown-outs) induites par les appels de courant des moteurs, le système dispose de 3 circuits indépendants :
