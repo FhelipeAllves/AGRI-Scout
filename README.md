@@ -44,7 +44,7 @@ Le robot est structuré sur deux étages pour isoler physiquement l'électroniqu
   * Slamtec RPLiDAR A1 (USB)
   * Webcam USB (V4L2)
   * Capteur de sol NPK 8-en-1 (RS485 vers USB)
-  * IMU MPU-6050 (I2C)
+  * SparkFun OpenLog Artemis (I2C)
 
 ### Système d'Alimentation
 Afin d'éviter les chutes de tension (brown-outs) induites par les appels de courant des moteurs, le système dispose de 3 circuits indépendants :

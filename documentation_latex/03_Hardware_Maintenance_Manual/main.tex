@@ -98,7 +98,7 @@ Moteur sonde & NEMA 17 (moteur pas à pas) & 200 pas/tour, contrôlé via L298N 
 Pont en H (sonde) & L298N & Pins 4, 5, 6, 7 de l'Arduino \\
 LIDAR & Slamtec RPLiDAR A1 & USB, 115200 bauds, \texttt{/dev/ttyUSB0} \\
 Caméra & Webcam USB V4L2 & 320×240 MJPEG, \texttt{/dev/video0} \\
-IMU & MPU-6050 & I2C, non exploité en mission v1 \\
+IMU & SparkFun OpenLog Artemis & I2C, non exploité en mission v1 \\
 Capteur sol & Capteur NPK 8 paramètres & RS485/Modbus RTU, \texttt{/dev/ttyUSB1} \\
 Batterie moteurs & LiPo 5000 mAh (11.1 V, 3S) & Circuit de puissance des roues \\
 Batterie sonde & LiPo 2200 mAh (11.1 V, 3S) & Alimentation pont en H L298N \\
@@ -246,12 +246,12 @@ Pour déposer le LIDAR :
     \item Soulevez le LIDAR verticalement hors de son logement.
 \end{enumerate}
 
-\subsection{IMU (MPU-6050)}
+\subsection{IMU (SparkFun OpenLog Artemis)}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth, angle=-90]{images/IMG_IMU.jpeg}
-    \caption{Module IMU MPU-6050 fixé sur le support du LIDAR.}
+    \caption{Module SparkFun OpenLog Artemis fixé sur le support du LIDAR.}
     \label{fig:imu_hw}
 \end{figure}
 

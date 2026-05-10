@@ -1,0 +1,28 @@
+\babel@toc {french}{}\relax 
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
+\contentsline {section}{\numberline {2}Vue d'Ensemble du Robot}{1}{section.2}%
+\contentsline {section}{\numberline {3}Référence des Composants}{3}{section.3}%
+\contentsline {section}{\numberline {4}Système d'Alimentation}{3}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Architecture électrique}{3}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Démontage et remplacement des batteries}{4}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Interrupteur de puissance}{5}{subsection.4.3}%
+\contentsline {section}{\numberline {5}Électronique : Démontage et Remplacement}{5}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Raspberry Pi et Arduino}{5}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}LIDAR RPLiDAR A1}{7}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}IMU (SparkFun OpenLog Artemis)}{8}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Webcam USB}{8}{subsection.5.4}%
+\contentsline {section}{\numberline {6}Mécanique : Pièces Imprimées en 3D}{9}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Support d'élévation pour LIDAR et IMU}{9}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Support du moteur pas à pas (sonde)}{9}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Support inférieur de la sonde}{10}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}Support du capteur de sol}{10}{subsection.6.4}%
+\contentsline {subsection}{\numberline {6.5}Sonde à vis finalisée}{11}{subsection.6.5}%
+\contentsline {subsection}{\numberline {6.6}Supports des batteries}{11}{subsection.6.6}%
+\contentsline {section}{\numberline {7}Débogage Matériel}{11}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Roues non contrôlées au démarrage}{11}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}LIDAR muet ou absent}{12}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Arduino non détecté}{12}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}Sonde ne descend pas}{13}{subsection.7.4}%
+\contentsline {subsection}{\numberline {7.5}Caméra non détectée}{13}{subsection.7.5}%
+\contentsline {subsection}{\numberline {7.6}Conflit de ports USB (/dev/ttyUSB0 vs /dev/ttyUSB1)}{13}{subsection.7.6}%
+\contentsline {section}{\numberline {8}Maintenance Préventive}{14}{section.8}%

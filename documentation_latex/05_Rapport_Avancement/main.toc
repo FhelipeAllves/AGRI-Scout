@@ -1,0 +1,27 @@
+\babel@toc {french}{}\relax 
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Contexte et Motivation}{1}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Présentation du Projet AGRI-Scout}{1}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Périmètre de ce Rapport}{1}{subsection.1.3}%
+\contentsline {section}{\numberline {2}Objectifs Initiaux et Leur Évolution}{1}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Vision Initiale du Projet}{1}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Les Contraintes Rencontrées}{2}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}Instabilité Électrique}{2}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}Problèmes de Communication Série}{2}{subsubsection.2.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.3}Limites Computationnelles pour la Vision}{2}{subsubsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.3}Les Pivots Stratégiques}{2}{subsection.2.3}%
+\contentsline {section}{\numberline {3}Organisation du Projet}{3}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Répartition des Tâches}{3}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Chronologie du Projet (Septembre 2025 -- Avril 2026)}{5}{subsection.3.2}%
+\contentsline {section}{\numberline {4}Solutions Explorées et Abandonnées}{6}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Régulateur de Tension Centralisé (Traco Power)}{6}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Vision YOLO pour la Navigation}{6}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}micro-ROS sur Arduino}{6}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}IMU BNO055}{6}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Navigation Globale avec Nav2}{7}{subsection.4.5}%
+\contentsline {section}{\numberline {5}Pistes d'Amélioration et Perspectives Futures}{7}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Axe 1 : Refonte Mécanique et Châssis}{7}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Axe 2 : Upgrade Matériel et Navigation Avancée}{7}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Axe 3 : Détection de Végétation et de Pestes par YOLO}{8}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Axe 4 : Navigation GPS RTK et Missions par Points de Passage}{8}{subsection.5.4}%
+\contentsline {section}{\numberline {6}Conclusion}{9}{section.6}%

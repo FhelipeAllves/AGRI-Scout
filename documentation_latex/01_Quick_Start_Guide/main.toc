@@ -1,0 +1,7 @@
+\babel@toc {french}{}\relax 
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
+\contentsline {section}{\numberline {2}Identification des Composants}{1}{section.2}%
+\contentsline {section}{\numberline {3}Prérequis Matériels}{1}{section.3}%
+\contentsline {section}{\numberline {4}Procédure de Démarrage}{2}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Mise sous tension}{2}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Démarrage Logiciel}{4}{subsection.4.2}%
