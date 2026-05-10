@@ -4,24 +4,24 @@ from launch_ros.actions import Node
 from launch.actions import ExecuteProcess
 
 def generate_launch_description():
-    # Caminho do Cérebro Python do Robô
-    base_dir = '/home/ubuntu/AGRI-Scout_Modif'
+    # Python Brain Path
+    base_dir = '/home/ubuntu/AGRI-Scout'
     
     return LaunchDescription([
-       # 1. ATIVAR A RETINA (Câmera USB V4L2)
+       # 1. ACTIVATE RETINA (USB V4L2 Camera)
         Node(
             package='v4l2_camera',
             executable='v4l2_camera_node',
             name='v4l2_camera_node',
-            output='screen', # Mude para 'screen' temporariamente para ver se há erros
+            output='screen', # Change to 'screen' temporarily to see errors
             parameters=[{
                 'image_size': [320, 240], 
-                'time_per_frame': [1, 10], # Aumentei para 10 FPS, pois com MJPG a Pi aguenta rindo!
-                'pixel_format': 'mjpeg',   # A MÁGICA: Puxa o bloco [2] do hardware da câmera
+                'time_per_frame': [1, 10], # Increased to 10 FPS, Pi handles MJPG easily
+                'pixel_format': 'mjpeg',   # THE MAGIC: Pulls hardware block [2] from camera
             }]
         ),
         
-        # 2. ATIVAR O ESCUDO FRONTAL (LiDAR)
+        # 2. ACTIVATE FRONT SHIELD (LiDAR)
         Node(
             package='rplidar_ros',
             executable='rplidar_composition',
@@ -38,7 +38,7 @@ def generate_launch_description():
         ExecuteProcess(
             cmd=['python3', 'python_control/agri_line_follower.py'],
             cwd=base_dir,
-            output='screen', # Fundamental para ler os Logs do "Alvo Atingido"
+            output='screen', # Essential to read target logs
             emulate_tty=True
         )
     ])

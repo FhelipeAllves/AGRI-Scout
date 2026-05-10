@@ -7,7 +7,7 @@ import time
 class ImuGpsTester(Node):
     def __init__(self):
         super().__init__('hardware_test_imu_gps')
-        self.get_logger().info("Iniciando Teste de IMU e GPS...")
+        self.get_logger().info("Starting IMU and GPS Test...")
         
         self.imu_data = None
         self.gps_data = None
@@ -25,17 +25,17 @@ class ImuGpsTester(Node):
 
     def timer_callback(self):
         print("\n========================================")
-        print("🧭 Status do IMU e GPS:")
+        print("🧭 IMU and GPS Status:")
         
         if self.imu_data:
             q = self.imu_data.orientation
             av = self.imu_data.angular_velocity
             la = self.imu_data.linear_acceleration
-            print(f"🔹 IMU Orientação  : (x:{q.x:.2f}, y:{q.y:.2f}, z:{q.z:.2f}, w:{q.w:.2f})")
+            print(f"🔹 IMU Orientation : (x:{q.x:.2f}, y:{q.y:.2f}, z:{q.z:.2f}, w:{q.w:.2f})")
             print(f"🔹 IMU Ang. Vel.   : (x:{av.x:.2f}, y:{av.y:.2f}, z:{av.z:.2f})")
             print(f"🔹 IMU Lin. Accel. : (x:{la.x:.2f}, y:{la.y:.2f}, z:{la.z:.2f})")
         else:
-            print("🔹 IMU             : Aguardando dados...")
+            print("🔹 IMU             : Waiting for data...")
             
         print("----------------------------------------")
             
@@ -47,7 +47,7 @@ class ImuGpsTester(Node):
             print(f"🔹 GPS Longitude   : {lon:.6f}")
             print(f"🔹 GPS Altitude    : {alt:.2f} m")
         else:
-            print("🔹 GPS             : Aguardando dados...")
+            print("🔹 GPS             : Waiting for data...")
             
         print("========================================")
 
@@ -57,7 +57,7 @@ def main(args=None):
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
-        node.get_logger().info("Teste de IMU/GPS encerrado pelo usuário.")
+        node.get_logger().info("IMU/GPS test terminated by user.")
     finally:
         node.destroy_node()
         rclpy.shutdown()

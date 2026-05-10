@@ -7,7 +7,7 @@ import time
 class UltrasoundTester(Node):
     def __init__(self):
         super().__init__('hardware_test_ultrasound')
-        self.get_logger().info("Iniciando Teste dos Sensores Ultrassônicos...")
+        self.get_logger().info("Starting Ultrasound Sensors Test...")
         
         self.readings = {
             'front': None,
@@ -28,13 +28,13 @@ class UltrasoundTester(Node):
 
     def timer_callback(self):
         print("\n========================================")
-        print(f"🦇 Leituras Ultrassônicas:")
+        print(f"🦇 Ultrasound Readings:")
         
         for pos, val in self.readings.items():
             if val is not None:
                 print(f"🔹 {pos.capitalize():<6} : {val:.3f} m")
             else:
-                print(f"🔹 {pos.capitalize():<6} : Aguardando dados...")
+                print(f"🔹 {pos.capitalize():<6} : Waiting for data...")
                 
         print("========================================")
 
@@ -44,7 +44,7 @@ def main(args=None):
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
-        node.get_logger().info("Teste dos Sensores Ultrassônicos encerrado pelo usuário.")
+        node.get_logger().info("Ultrasound Sensors Test terminated by user.")
     finally:
         node.destroy_node()
         rclpy.shutdown()

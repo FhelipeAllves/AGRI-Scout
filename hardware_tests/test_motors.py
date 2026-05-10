@@ -11,8 +11,8 @@ import termios
 class MotorsTester(Node):
     def __init__(self):
         super().__init__('hardware_test_motors')
-        self.get_logger().info("Iniciando Teste dos Motores...")
-        self.get_logger().info("CONTROLES: Opere usando as teclas W (frente), S (trás), A (esquerda), D (direita). Espaço para parar. Q para sair.")
+        self.get_logger().info("Starting Motors Test...")
+        self.get_logger().info("CONTROLS: Use W (forward), S (backward), A (left), D (right). Space to stop. Q to quit.")
         
         self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
         self.create_subscription(Odometry, '/odom', self.odom_callback, 10)

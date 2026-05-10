@@ -1,161 +1,211 @@
 /**
- * AGRI-Scout Firmware v4.1 (English Standard)
- * Hardware: Arduino UNO + ESCs + 3 Ultrasonic Sensors
- * Logic: Smart Directional Blocking (Safety Shield)
+ * AGRI-Scout Firmware v5.0 (Robust Checksum + DC RC-Driver)
  */
 
 #include <Servo.h>
+#include <Stepper.h>
 
-// --- SPEED CONFIGURATION (ESCs) ---
-// 90 is neutral. Range is usually 0-180.
-const int SPEED_STOP = 90;
-const int SPEED_FWD_SLOW = 65;
-const int SPEED_BACK_SLOW = 115;
-const int SPEED_TURN_FWD = 120;
-const int SPEED_TURN_BACK = 60;
+// ==========================================
+// 1. STEPPER MOTOR CONFIGURATION (PROBE)
+// ==========================================
+const int STEPS_PER_REVOLUTION = 200;
+const int pinM1 = 4; // Direction Motor 1
+const int pinE1 = 5; // Enable Motor 1
+const int pinE2 = 6; // Enable Motor 2
+const int pinM2 = 7; // Direction Motor 2
 
-// --- SAFETY CONFIGURATION ---
-const int SAFE_DISTANCE_CM = 20;
+/// Global variable to track the last direction (add at the top of the code)
+char lastMoveCmd = 'X';
 
-// --- PIN DEFINITIONS (No conflicts with Motors) ---
-// Motors (Must be PWM pins)
-const int PIN_ESC_LEFT = 5;
-const int PIN_ESC_RIGHT = 9;
+Stepper probeStepper(STEPS_PER_REVOLUTION, pinM1, pinM2);
 
-// Sensors (Trigger / Echo)
-const int TRIG_LEFT = 2;  const int ECHO_LEFT = 3;
-const int TRIG_REAR = 4;  const int ECHO_REAR = 7;
-const int TRIG_RIGHT = 8; const int ECHO_RIGHT = 11;
+// Probe State Machine
+enum ProbeState { PROBE_STOP, PROBE_UP, PROBE_DOWN };
+ProbeState currentProbeState = PROBE_STOP;
 
-// Objects
-Servo escLeft;
-Servo escRight;
+// ==========================================
+// 2. RC DRIVER CONFIGURATION (WHEELS)
+// ==========================================
+const int PIN_ESC_LEFT = 9;
+const int PIN_ESC_RIGHT = 10;
+
+Servo leftESC;
+Servo rightESC;
+
+const int ESC_NEUTRAL = 90;
+const int ESC_MIN = 0;
+const int ESC_MAX = 180;
+
+// ==========================================
+// 3. COMMUNICATION & FAILSAFE
+// ==========================================
+const byte START_BYTE = 0x3C; // '<'
+const byte END_BYTE = 0x3E;   // '>'
+
+unsigned long lastCommandTime = 0;
+const unsigned long FAILSAFE_TIMEOUT_MS = 1000;
+bool isStopped = true;
+
+bool newData = false;
+byte receivedCommand = 0;
+byte receivedValue = 0;
 
 void setup() {
   Serial.begin(9600);
 
-  // 1. Setup Sensors
-  pinMode(TRIG_LEFT, OUTPUT); pinMode(ECHO_LEFT, INPUT);
-  pinMode(TRIG_REAR, OUTPUT); pinMode(ECHO_REAR, INPUT);
-  pinMode(TRIG_RIGHT, OUTPUT); pinMode(ECHO_RIGHT, INPUT);
+  // Stepper Setup
+  pinMode(pinE1, OUTPUT);
+  pinMode(pinE2, OUTPUT);
+  digitalWrite(pinE1, HIGH);
+  digitalWrite(pinE2, HIGH);
+  probeStepper.setSpeed(50);
 
-  // 2. Setup Motors
-  Serial.println("SYSTEM: Initializing ESCs...");
-  escLeft.attach(PIN_ESC_LEFT);
-  escRight.attach(PIN_ESC_RIGHT);
-  
-  // 3. Arming Sequence (Neutral Signal)
-  stopMotors(); 
-  delay(3000); // Wait 3s for ESCs to recognize neutral and stop beeping
-  
-  Serial.println("SYSTEM: Ready. 360 Shield Active.");
+  // Wheels Setup
+  leftESC.attach(PIN_ESC_LEFT);
+  rightESC.attach(PIN_ESC_RIGHT);
+  stopWheels();
+
+  Serial.println("SYSTEM: Initialized. Robust Protocol Active.");
 }
 
 void loop() {
-  if (Serial.available() > 0) {
-    char cmd = Serial.read();
-    executeCommand(cmd);
+  receiveSecurePacket();
+
+  if (newData) {
+    executeCommand((char)receivedCommand, (int)receivedValue);
+    newData = false;
+  }
+
+  // Watchdog Failsafe
+  if (millis() - lastCommandTime > FAILSAFE_TIMEOUT_MS) {
+    if (!isStopped || currentProbeState != PROBE_STOP) {
+      Serial.println("WARNING: Timeout! Engaging Failsafe.");
+      stopWheels();
+      currentProbeState = PROBE_STOP;
+    }
+  }
+
+  // Non-blocking Probe Movement
+  if (currentProbeState == PROBE_UP) {
+    probeStepper.step(1);
+  } else if (currentProbeState == PROBE_DOWN) {
+    probeStepper.step(-1);
   }
 }
 
-// --- COMMAND LOGIC WITH PROTECTION ---
-void executeCommand(char cmd) {
-  
-  // Read sensors BEFORE making a decision
-  int distLeft = readDistance(TRIG_LEFT, ECHO_LEFT);
-  int distRear = readDistance(TRIG_REAR, ECHO_REAR);
-  int distRight = readDistance(TRIG_RIGHT, ECHO_RIGHT);
+// --- PACKET PARSER ---
+void receiveSecurePacket() {
+  static boolean recvInProgress = false;
+  static byte index = 0;
+  byte incomingByte;
+  static byte packetBuffer[3];
 
+  while (Serial.available() > 0 && newData == false) {
+    incomingByte = Serial.read();
+
+    if (recvInProgress == true) {
+      if (incomingByte != END_BYTE) {
+        packetBuffer[index] = incomingByte;
+        index++;
+        if (index >= 3)
+          index = 2; // Prevent overflow
+      } else {
+        recvInProgress = false;
+        index = 0;
+
+        byte cmd = packetBuffer[0];
+        byte val = packetBuffer[1];
+        byte rx_checksum = packetBuffer[2];
+
+        // Verify Integrity
+        if ((cmd ^ val) == rx_checksum) {
+          receivedCommand = cmd;
+          receivedValue = val;
+          newData = true;
+          lastCommandTime = millis(); // Refresh Watchdog
+        }
+      }
+    } else if (incomingByte == START_BYTE) {
+      recvInProgress = true;
+    }
+  }
+}
+
+void executeCommand(char cmd, int speed) {
+
+  // --- THE "AUTO-SPACE" LOGIC ---
+  // If the command is a movement, AND it's different from the last one, AND we
+  // aren't already stopped
+  if ((cmd == 'F' || cmd == 'B' || cmd == 'L' || cmd == 'R') &&
+      (cmd != lastMoveCmd && lastMoveCmd != 'X')) {
+
+    Serial.println("SYSTEM: AUTO-SPACE (BRAKE INITIATED)");
+    stopWheels(); // Force Neutral (90)
+
+    // Mimic the human delay of pressing the Spacebar
+    delay(2 * 500);
+
+    // CRITICAL FIX: Clear the Serial buffer.
+    // The Pi kept sending packets while we were waiting 500ms.
+    // We must flush them to avoid confusing the ESC with queued commands.
+    while (Serial.available() > 0) {
+      Serial.read();
+    }
+
+    newData = false;
+    lastMoveCmd = 'X'; // Reset state to Neutral
+  }
+
+  // Update the tracker for the next cycle
+  lastMoveCmd = cmd;
+
+  // --- NORMAL COMMAND EXECUTION ---
   switch (cmd) {
-    case 'F': // Forward (We trust the user/camera, but could add Front Sensor here)
-      moveForward();
-      Serial.println("MOVING_FWD");
-      break;
-
-    case 'B': // Backward (Check REAR Sensor)
-      if (distRear > SAFE_DISTANCE_CM) {
-        moveBackward();
-        Serial.println("MOVING_BACK");
-      } else {
-        stopMotors();
-        Serial.println("WARNING: OBSTACLE_REAR");
-      }
-      break;
-
-    case 'L': // Turn Left (Check LEFT Sensor)
-      if (distLeft > SAFE_DISTANCE_CM) {
-        turnLeft();
-        Serial.println("TURNING_LEFT");
-      } else {
-        stopMotors();
-        Serial.println("WARNING: OBSTACLE_LEFT");
-      }
-      break;
-
-    case 'R': // Turn Right (Check RIGHT Sensor)
-      if (distRight > SAFE_DISTANCE_CM) {
-        turnRight();
-        Serial.println("TURNING_RIGHT");
-      } else {
-        stopMotors();
-        Serial.println("WARNING: OBSTACLE_RIGHT");
-      }
-      break;
-
-    case 'S': // Stop
-    case 'P': 
-      stopMotors();
-      Serial.println("STOPPED");
-      break;
-      
-    case 'T': // Telemetry (Send data from all 3 sensors)
-      Serial.print("DATA|Left:");
-      Serial.print(distLeft);
-      Serial.print("|Rear:");
-      Serial.print(distRear);
-      Serial.print("|Right:");
-      Serial.println(distRight);
-      break;
+  case 'F':
+    moveDirection(-speed, -speed);
+    Serial.println("MOVING: FWD");
+    break;
+  case 'B':
+    moveDirection(speed, speed);
+    Serial.println("MOVING: BACK");
+    break;
+  case 'L':
+    moveDirection(speed, -speed);
+    Serial.println("TURNING: LEFT");
+    break;
+  case 'R':
+    moveDirection(-speed, speed);
+    Serial.println("TURNING: RIGHT");
+    break;
+  case 'U':
+    currentProbeState = PROBE_UP;
+    Serial.println("PROBE: UP");
+    break;
+  case 'D':
+    currentProbeState = PROBE_DOWN;
+    Serial.println("PROBE: DOWN");
+    break;
+  case 'X':
+    stopWheels();
+    currentProbeState = PROBE_STOP;
+    lastMoveCmd = 'X';
+    Serial.println("SYSTEM: STOPPED");
+    break;
   }
 }
 
-// --- MOVEMENT FUNCTIONS ---
-void moveForward() {
-  escLeft.write(SPEED_FWD_SLOW);
-  escRight.write(SPEED_FWD_SLOW);
+// --- WHEEL MATH (Based on User's working model) ---
+void moveDirection(int leftRelative, int rightRelative) {
+  int leftPWM = constrain(ESC_NEUTRAL + leftRelative, ESC_MIN, ESC_MAX);
+  int rightPWM = constrain(ESC_NEUTRAL + rightRelative, ESC_MIN, ESC_MAX);
+
+  leftESC.write(leftPWM);
+  rightESC.write(rightPWM);
+  isStopped = false;
 }
 
-void moveBackward() {
-  escLeft.write(SPEED_BACK_SLOW);
-  escRight.write(SPEED_BACK_SLOW);
-}
-
-void turnLeft() {
-  // Tank Turn: Left goes Back, Right goes Forward
-  escLeft.write(SPEED_TURN_BACK);
-  escRight.write(SPEED_TURN_FWD);
-}
-
-void turnRight() {
-  // Tank Turn: Left goes Forward, Right goes Back
-  escLeft.write(SPEED_TURN_FWD);
-  escRight.write(SPEED_TURN_BACK);
-}
-
-void stopMotors() {
-  escLeft.write(SPEED_STOP);
-  escRight.write(SPEED_STOP);
-}
-
-// --- HELPER FUNCTION ---
-int readDistance(int trigPin, int echoPin) {
-  digitalWrite(trigPin, LOW); delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH); delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  
-  // Short timeout (25ms) to prevent blocking the robot loop
-  long duration = pulseIn(echoPin, HIGH, 25000); 
-  
-  if (duration == 0) return 999; // No obstacle (infinity)
-  return duration * 0.034 / 2;
+void stopWheels() {
+  leftESC.write(ESC_NEUTRAL);
+  rightESC.write(ESC_NEUTRAL);
+  isStopped = true;
 }

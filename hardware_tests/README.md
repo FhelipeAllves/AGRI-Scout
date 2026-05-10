@@ -1,68 +1,68 @@
-# Testes de Hardware - AGRI-Scout (Robô Real)
+# Hardware Tests - AGRI-Scout (Physical Robot)
 
-Bem-vindo ao conjunto de ferramentas de teste para o AGRI-Scout físico. 
-Esses scripts foram desenhados para verificar isoladamente cada sensor, motor, e o sistema em que o ROS 2 está rodando (Raspberry Pi 4 B + Arduino), garantindo que tudo está pronto antes de subir a stack de navegação autônoma (`nav2`).
+Welcome to the testing toolkit for the physical AGRI-Scout.
+These scripts are designed to independently verify each sensor, motor, and the system running ROS 2 (Raspberry Pi 4 B + Arduino), ensuring everything is ready before bringing up the autonomous navigation stack (`nav2`).
 
-Como faz tempo que você não acessa a Raspberry Pi, este guia foi feito passo a passo, para te levar pela mão desde a conexão com a internet até a execução dos testes. Siga os passos cronologicamente.
+This step-by-step guide is designed to walk you through everything from connecting to the internet to running the tests. Follow the steps chronologically.
 
 ---
 
-## Passo 0: Acesso Básico e Internet na Raspberry Pi
+## Step 0: Basic Access and Internet on the Raspberry Pi
 
-Se você ligou a Raspberry Pi e não sabe se tem internet conectada:
+If you have powered on the Raspberry Pi and are unsure if it is connected to the internet:
 
-### 1. Conectando a Raspberry à Internet (Wi-Fi)
-Se estiver usando a Raspberry via monitor e teclado, você pode conectar no Wi-Fi usando a interface gráfica do sistema operacional (canto superior direito da tela).
+### 1. Connecting the Raspberry Pi to the Internet (Wi-Fi)
+If using the Raspberry Pi with a monitor and keyboard, you can connect to Wi-Fi using the OS graphical interface (top right corner).
 
-Se estiver acessando via linha de comando (terminal, SSH ou TTY), use o gerenciador de redes `nmcli`:
+If accessing via command line (terminal, SSH, or TTY), use the `nmcli` network manager:
 ```bash
-# Listar as redes Wi-Fi disponíveis ao redor
+# List available Wi-Fi networks
 nmcli dev wifi list
 
-# Conectar na sua rede (substitua pelo nome da sua rede e a senha dela)
-sudo nmcli dev wifi connect "NOME_DA_REDE" password "SUA_SENHA_DO_WIFI"
+# Connect to your network (replace with your network name and password)
+sudo nmcli dev wifi connect "NETWORK_NAME" password "YOUR_WIFI_PASSWORD"
 ```
 
-### 2. Testando a conexão
+### 2. Testing the connection
 ```bash
 ping -c 4 google.com
 ```
-*Se o comando responder com "64 bytes from...", você tem internet e pode seguir para o próximo passo! Se der erro de rede, repita o Passo 1.*
+*If the command replies with "64 bytes from...", you have internet access and can proceed! If you get a network error, repeat Step 1.*
 
 ---
 
-## Passo 1: Verificando e Preparando o Ambiente (ROS 2)
+## Step 1: Verifying and Preparing the Environment (ROS 2)
 
-O cérebro do robô utiliza o **ROS 2 Jazzy**. Precisamos garantir que ele está instalado e que o workspace do projeto (pasta `agri_scout_ws`) está pronto para uso.
+The robot's brain uses **ROS 2 Jazzy**. We must ensure it is installed and the project workspace (`agri_scout_ws` directory) is ready.
 
-### 1. O ROS 2 está instalado?
-Para saber se o ROS 2 está instalado, tente "ativar" o ambiente dele no terminal atual:
+### 1. Is ROS 2 installed?
+To check if ROS 2 is installed, try to "source" its environment in the current terminal:
 ```bash
 source /opt/ros/jazzy/setup.bash
 ```
-* **Se não aparecer NADA na tela:** O comando deu certo, o ROS 2 está instalado!
-* **Se der erro (ex: `No such file or directory`):** Significa que o ROS 2 não está instalado. Siga a [documentação oficial de instalação do ROS 2 Jazzy no Ubuntu](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html) (baixe os pacotes "Desktop") antes de continuar.
+* **If NOTHING appears on the screen:** The command succeeded, ROS 2 is installed!
+* **If you get an error (e.g., `No such file or directory`):** ROS 2 is not installed. Follow the [official ROS 2 Jazzy Ubuntu installation documentation](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html) (download the "Desktop" packages) before proceeding.
 
-### 2. O Workspace (`agri_scout_ws`) existe e está compilado?
-Os códigos de navegação e pacotes do robô ficam na pasta base de trabalho em `~/agri_scout_ws`. 
-Verifique se ele já foi compilado e está pronto para o uso listando a pasta de instalação:
+### 2. Does the Workspace (`agri_scout_ws`) exist and is it compiled?
+The robot's navigation code and packages are located in the `~/agri_scout_ws` workspace.
+Check if it has been compiled and is ready for use by listing the install directory:
 ```bash
 ls ~/agri_scout_ws/install
 ```
-* **Se a pasta existir:** Ótimo! Faça o setup do workspace:
+* **If the folder exists:** Great! Source the workspace setup:
   ```bash
   source ~/agri_scout_ws/install/setup.bash
   ```
-* **Se NÃO existir ou der erro indicando que a pasta não foi achada:** Você precisa compilar o projeto inteiro. Execute os comandos abaixo:
+* **If it DOES NOT exist or you get an error:** You need to compile the entire project. Run the following commands:
   ```bash
   cd ~/agri_scout_ws
   colcon build --symlink-install
   source install/setup.bash
   ```
 
-### 3. Instalando dependências dos testes Python
-Os scripts de teste que você vai rodar dependem de algumas bibliotecas do Python, em especial a ferramenta `psutil` para ler dados da CPU e Memória da Raspberry.
-Instale usando o gerenciador de pacotes do sistema (recomendado no Ubuntu 24.04+):
+### 3. Installing Python test dependencies
+The test scripts you will run depend on some Python libraries, specifically the `psutil` tool to read CPU and Memory data from the Raspberry Pi.
+Install it using the system package manager (recommended for Ubuntu 24.04+):
 ```bash
 sudo apt update
 sudo apt install python3-psutil
@@ -70,100 +70,100 @@ sudo apt install python3-psutil
 
 ---
 
-## Passo 2: Iniciando os Drivers de Hardware (A Base de Tudo)
+## Step 2: Starting Hardware Drivers (The Foundation)
 
-⚠️ **MUITO IMPORTANTE:** Os scripts de teste interativos (Passo 3) **NÃO VÃO FUNCIONAR** se os sensores não estiverem ligados logicamente. O ROS 2 precisa estar "acordado" e traduzindo o sinal elétrico de cada cabo USB em mensagens que os nossos scripts entendam.
+⚠️ **VERY IMPORTANT:** The interactive test scripts (Step 3) **WILL NOT WORK** if the sensors are not logically connected. ROS 2 needs to be "awake" and translating the electrical signal from each USB cable into messages our scripts understand.
 
-Para manter a organização, abra **novas abas do terminal** (usando o ícone do terminal na interface ou screen/tmux) para cada um dos drivers abaixo. 
+To stay organized, open **new terminal tabs** (using the terminal icon or screen/tmux) for each of the drivers below.
 
-Em **cada novo terminal/aba**, você **DEVE** sempre rodar estes dois comandos antes de mais nada:
+In **every new terminal/tab**, you **MUST** always run these two commands first:
 ```bash
 source /opt/ros/jazzy/setup.bash
 source ~/agri_scout_ws/install/setup.bash
 ```
 
-### Terminal A (Arduino - Motores, Encoders, Ultrassom)
-Certifique-se de que o Arduino está conectado via cabo USB e inicie o agente micro-ROS (se for micro-ROS) ou rosserial. Normalmente a porta é a `ttyUSB0`.
+### Terminal A (Arduino - Motors, Encoders, Ultrasound)
+Ensure the Arduino is connected via USB and start the micro-ROS agent (if using micro-ROS) or rosserial. Usually, the port is `ttyUSB0`.
 ```bash
 ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
-# Dica: Se falhar dizendo que a porta não existe, desconecte e conecte o Arduino 
-# e rode 'dmesg | grep tty' para ver o nome correto (ex: ttyACM0).
+# Tip: If it fails saying the port does not exist, disconnect and reconnect the Arduino 
+# and run 'dmesg | grep tty' to see the correct name (e.g., ttyACM0).
 ```
 
-### Terminal B (LiDAR - Sensor de varredura a laser)
-Inicializa o pacote oficial da Lidar. Ajuste o nome do launch (.py) caso você utilize um modelo diferente.
+### Terminal B (LiDAR - Laser Scanning Sensor)
+Initialize the official LiDAR package. Adjust the launch file name (.py) if using a different model.
 ```bash
 ros2 launch rplidar_ros rplidar_a2m12_launch.py
 ```
 
-### Terminal C (Câmera RealSense - Visão Computacional)
-Inicializa o pacote que traduz a imagem USB em imagem ROS.
+### Terminal C (RealSense Camera - Computer Vision)
+Initialize the package that translates the USB image into a ROS image.
 ```bash
 ros2 launch realsense2_camera rs_launch.py
 ```
 
-**🤔 Como ter certeza que deu certo?** 
-Abra um terminal qualquer, faça o `source` mágico (`source /opt/ros/jazzy/setup.bash`) e rode:
+**🤔 How to be sure it worked?**
+Open any terminal, source the setup (`source /opt/ros/jazzy/setup.bash`) and run:
 ```bash
 ros2 topic list
 ```
-Você deverá ver uma lista grande de palavras como `/scan`, `/odom`, `/camera/color/image_raw`. Se eles apareceram, parabéns! Os sensores estão conversando corretamente.
+You should see a large list of words like `/scan`, `/odom`, `/camera/color/image_raw`. If they appear, congratulations! The sensors are communicating properly.
 
 ---
 
-## Passo 3: Executando os Testes de Hardware Práticos
+## Step 3: Running the Practical Hardware Tests
 
-Finalmente, com a base do sistema publicando dados nas veias do robô, vamos rodar seus scripts de teste. 
-Volte para a raiz desse README:
+Finally, with the base system publishing data into the robot's veins, let's run the test scripts.
+Return to the root of this README:
 ```bash
 cd ~/AGRI-Scout/hardware_tests/
 ```
 
-Dê permissão de execução a todos os scripts (só precisa fazer uma única vez na vida):
+Give execution permissions to all scripts (only needs to be done once):
 ```bash
 chmod +x *.py
 ```
 
-E os execute um a um na ordem sugerida:
+And run them one by one in the suggested order:
 
-### 1. Monitor do Sistema (Coração da Operação)
+### 1. System Monitor (Operation Heart)
 ```bash
 ./system_monitor.py
 ```
-* **🔍 O que verificar:** Se o uso de CPU está aceitável (abaixo de 80%), a Temperatura não está ultrapassando os 75-80°C (evitando danos ao chip) e a Memória RAM não está enforcada (100% de uso).
+* **🔍 What to verify:** CPU usage is acceptable (under 80%), Temperature is not exceeding 75-80°C (preventing chip damage), and RAM is not maxed out (100% usage).
 
-### 2. LiDAR e Câmera (Sensores de Alto Débito)
-Estes são os sensores que emitem a maior carga de dados pelo cabo USB.
+### 2. LiDAR and Camera (High-Throughput Sensors)
+These sensors push the most data through the USB cable.
 ```bash
 ./test_lidar.py
 ./test_camera.py
 ```
-* **🔍 O que verificar:** A frequência (Hz) de publicação está rápida e consistente? O LiDAR tem pontos na nuvem de scan? A Câmera abre e retorna pelo menos o formato dos quadros (ex: 640x480)?
+* **🔍 What to verify:** Is the publishing frequency (Hz) fast and consistent? Does the LiDAR have points in the scan cloud? Does the Camera open and return at least the frame format (e.g., 640x480)?
 
-### 3. IMU e GPS (Sensores de Posicionamento Espacial)
+### 3. IMU and GPS (Spatial Positioning Sensors)
 ```bash
 ./test_imu_gps.py
 ```
-* **🔍 O que verificar:** A orientação X, Y, Z da IMU não fica girando loucamente quando o robô está perfeitamente parado no chão. O GPS consegue sinal de satélite (Fix Status válido) em um ambiente externo.
+* **🔍 What to verify:** The X, Y, Z orientation from the IMU doesn't spin wildly when the robot is perfectly still on the ground. The GPS gets a satellite signal (valid Fix Status) outdoors.
 
-### 4. Sensores Ultrassônicos (Parachoque frontal e laterais)
+### 4. Ultrasonic Sensors (Front and Side Bumpers)
 ```bash
 ./test_ultrasound.py
 ```
-* **🔍 O que verificar:** Coloque a sua mão na frente de cada um dos sensores e observe no terminal se a distância que aparece vai cair corretamente e vai acompanhar a distância real da sua mão. 
+* **🔍 What to verify:** Place your hand in front of each sensor and observe in the terminal if the displayed distance drops correctly and tracks the real distance of your hand.
 
-### 5. Motores (Odometria e Acionamento) ✨ ALTO RISCO ✨
-⚠️ **RECOMENDADO:** Erga as rodas do robô e coloque ele sobre um banco/cerâmica firme na sua primeira tentativa para evitar que o robô de fato dispare e atropele alguém.
+### 5. Motors (Odometry and Actuation) ✨ HIGH RISK ✨
+⚠️ **RECOMMENDED:** Lift the robot's wheels and place it on a firm stool/block for your first attempt to prevent the robot from shooting forward and hitting someone.
 ```bash
 ./test_motors.py
 ```
-* **🔍 O que verificar:** 
-  1. Ao pressionar `W`, ambas as esteiras/rodas vão para frente?
-  2. O valor de odometria cresce de forma condizente?
-  3. Pressione `A` (girar esquerda) e `D` (girar direita) - ele gira para o lado correto? 
-  4. Pressione e segure `ESPAÇO` para garantir o freio instantâneo do drive.
+* **🔍 What to verify:** 
+  1. When pressing `W`, do both tracks/wheels move forward?
+  2. Does the odometry value increase consistently?
+  3. Press `A` (turn left) and `D` (turn right) - does it turn the correct way?
+  4. Press and hold `SPACE` to ensure the instant brake works.
 
 ---
-**🛠️ Dica de Ouro / Troubleshooting Geral:** 
-Se ao subir qualquer dos testes do **Passo 3** você ler algo como *"Aguardando dados...*" permanentemente no terminal (por mais de 10 segundos) e nada mais acontecer: **O seu driver tombou.**
-Isso significa que o Passo 2 de alguma forma falhou. Volte ao terminal daquele driver, aperte `Ctrl+C` para matar o processo, cheque as conexões dos cabos na porta USB e inicie ele novamente. 
+**🛠️ Pro Tip / General Troubleshooting:**
+If you start any test from **Step 3** and see something like *"Waiting for data..."* permanently in the terminal (for over 10 seconds) and nothing else happens: **Your driver crashed.**
+This means Step 2 failed somehow. Return to that driver's terminal, press `Ctrl+C` to kill the process, check the USB cable connections, and start it again.

@@ -8,7 +8,7 @@ import os
 class CameraTester(Node):
     def __init__(self):
         super().__init__('hardware_test_camera')
-        self.get_logger().info("Iniciando Teste da Câmera (RGB e Profundidade)...")
+        self.get_logger().info("Starting Camera Test (RGB and Depth)...")
         
         self.sub_rgb = self.create_subscription(
             Image,
@@ -48,9 +48,9 @@ class CameraTester(Node):
             depth_hz = self.depth_count / (current_time - self.start_time)
             
             print("\n========================================")
-            print(f"📷 Status da Câmera:")
-            print(f"🔹 RGB Taxa / Formato        : {rgb_hz:.2f} Hz | {self.last_rgb_info or 'N/A'}")
-            print(f"🔹 Profundidade Taxa         : {depth_hz:.2f} Hz | {self.last_depth_info or 'N/A'}")
+            print(f"📷 Camera Status:")
+            print(f"🔹 RGB Rate / Format         : {rgb_hz:.2f} Hz | {self.last_rgb_info or 'N/A'}")
+            print(f"🔹 Depth Rate                : {depth_hz:.2f} Hz | {self.last_depth_info or 'N/A'}")
             print("========================================")
             
             self.rgb_count = 0
@@ -64,7 +64,7 @@ def main(args=None):
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
-        node.get_logger().info("Teste da Câmera encerrado pelo usuário.")
+        node.get_logger().info("Camera Test terminated by user.")
     finally:
         node.destroy_node()
         rclpy.shutdown()

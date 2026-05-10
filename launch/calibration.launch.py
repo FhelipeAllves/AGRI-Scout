@@ -4,16 +4,16 @@ from launch.actions import ExecuteProcess
 from launch_ros.actions import Node
 
 def generate_launch_description():
-    # Caminho absoluto da pasta onde estão os scripts (considerando o pacote do usuário no Pi)
-    base_dir = '/home/ubuntu/AGRI-Scout_Modif'
+    # Absolute path to scripts directory (Pi user workspace)
+    base_dir = '/home/ubuntu/AGRI-Scout'
     
     return LaunchDescription([
-        # 1. Lança o LiDAR nativamente como um Nó do ROS 2
+        # 1. Launch LiDAR natively as a ROS 2 Node
         Node(
             package='rplidar_ros',
             executable='rplidar_composition',
             name='rplidar_node',
-            output='log', # Evita poluir a tela com mensagens do Lidar
+            output='log', # Avoid polluting the screen with Lidar messages
             parameters=[{
                 'serial_port': '/dev/ttyUSB0',
                 'serial_baudrate': 115200,
@@ -23,11 +23,11 @@ def generate_launch_description():
             }]
         ),
         
-        # 2. Executa o Script em Python puro do IMU Artemis no plano de fundo
+        # 2. Run pure Python script for IMU Artemis in the background
         ExecuteProcess(
-            cmd=['python3', 'Luiz_2304_testeArtemis.py'],
+            cmd=['python3', 'python_control/imu_artemis_parser.py'],
             cwd=base_dir,
-            output='screen', # Mostra o Roll, Pitch e Yaw na tela principal
-            emulate_tty=True # Mantém o print formatado perfeitamente
+            output='screen', # Show Roll, Pitch, and Yaw on main screen
+            emulate_tty=True # Keep print output formatted perfectly
         )
     ])

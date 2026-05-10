@@ -105,38 +105,38 @@ void loop() {
       Serial.println("Probe -> Moving DOWN.");
     }
 
-    // Command 'F': Forward (Frente)
-    // Invertido fisicamente: agora subtrai para ir para frente
+    // Command 'F': Forward
+    // Physically inverted: now subtracts to go forward
     else if (commandType == 'F') {
       int speed = Serial.parseInt(); 
       moveDirection(-speed, -speed);
       isStopped = false;
     }
 
-    // Command 'B': Backward (Trás)
-    // Invertido fisicamente: agora soma para ir para trás
+    // Command 'B': Backward
+    // Physically inverted: now adds to go backward
     else if (commandType == 'B') {
       int speed = Serial.parseInt();
       moveDirection(speed, speed);
       isStopped = false;
     }
 
-    // Command 'L': Left (Esquerda - Skid steer mapping)
+    // Command 'L': Left (Skid steer mapping)
     else if (commandType == 'L') {
       int speed = Serial.parseInt();
       moveDirection(speed, -speed);
       isStopped = false;
     }
 
-    // Command 'R': Right (Direita - Skid steer mapping)
+    // Command 'R': Right (Skid steer mapping)
     else if (commandType == 'R') {
       int speed = Serial.parseInt();
       moveDirection(-speed, speed);
       isStopped = false;
     }
 
-    // Command 'M': Motores Independentes Mode [LeftPWM RightPWM]
-    // Permite que a Câmera defina forças diferenciais absolutas (Ex: Curva sem acionar freio mecânico)
+    // Command 'M': Independent Motors Mode [LeftPWM RightPWM]
+    // Allows Camera to define absolute differential forces (e.g. Curve without mechanical brake)
     else if (commandType == 'M') {
       int leftPwm = Serial.parseInt();
       int rightPwm = Serial.parseInt();
@@ -144,7 +144,7 @@ void loop() {
       isStopped = false;
     }
 
-    // Command 'X': Hard Stop (Parar Tudo)
+    // Command 'X': Hard Stop (Stop Everything)
     else if (commandType == 'X') {
       stopWheels();
       currentProbeState = PROBE_STOP;

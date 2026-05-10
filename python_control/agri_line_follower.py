@@ -69,19 +69,19 @@ class AgriLineFollower(Node):
         self.declare_parameter('pwm_forward_range', 100)  
 
         # ------------------------------------------------------------------ #
-        # Timer de Automação da Sonda                                        #
+        # Probe Automation Timer                                             #
         # ------------------------------------------------------------------ #
         self.harvest_in_progress = False
-        # Cria um timer que chama a função a cada 30.0 segundos
+        # Create a timer that calls the function every 30.0 seconds
         self.auto_probe_timer = self.create_timer(30.0, self.auto_probe_callback)
         
-        self.get_logger().info("⏳ Automação: Sonda programada para cada 30s.") 
+        self.get_logger().info("⏳ Automation: Probe scheduled every 30s.") 
 
         # Serial Connection (FIXED TIMEOUTS)
         self.robot = None
         for port in ['/dev/ttyACM0', '/dev/ttyACM1', '/dev/ttyUSB0', '/dev/ttyUSB1']:
             try:
-                # ADICIONADO write_timeout=0.5 para impedir que a Thread congele
+                # ADDED write_timeout=0.5 to prevent Thread freeze
                 self.robot = serial.Serial(port, 9600, timeout=0.1, write_timeout=0.5)
                 time.sleep(2)
                 self.get_logger().info(f"✅ Arduino connected on {port}")
@@ -122,8 +122,8 @@ class AgriLineFollower(Node):
         now = time.monotonic()
         if (cmd_char, value) != self._last_action or (now - self._last_cmd_time) > 0.4:
             
-            # --- CORREÇÃO DO DEADLOCK SERIAL ---
-            # Limpa o "lixo" que o Arduino enviou para não congestionar a porta USB
+            # --- SERIAL DEADLOCK FIX ---
+            # Clear the "garbage" sent by Arduino to avoid USB congestion
             try:
                 if self.robot.in_waiting > 0:
                     self.robot.reset_input_buffer()
@@ -230,8 +230,8 @@ class AgriLineFollower(Node):
                     line_found = True
                     self.lost_frames = 0
                     
-                    # CORREÇÃO DA DIREÇÃO (Sem sinal negativo no início)
-                    # Linha na direita = cx maior = Erro Positivo.
+                    # DIRECTION FIX (No negative sign at the start)
+                    # Line on the right = larger cx = Positive Error.
                     cx = M["m10"] / M["m00"]
                     error = (cx - roi.shape[1] / 2.0) / (roi.shape[1] / 2.0)
 
@@ -246,7 +246,7 @@ class AgriLineFollower(Node):
 
                     max_steer = self.get_parameter('max_steer').value
                     
-                    # Erro Positivo = Curva Positiva (Direita)
+                    # Positive Error = Positive Turn (Right)
                     raw_steer = (self.get_parameter('kp').value * error + self.get_parameter('kd').value * de_dt)
                     steer = clamp(raw_steer, -max_steer, max_steer)
 
@@ -305,7 +305,7 @@ class AgriLineFollower(Node):
                 np.array([p('red_h_hi').value, p('red_s_hi').value, p('red_v_hi').value]))
 
     def harvest_routine(self):
-        self.harvest_in_progress = True  # Bloqueia novos disparos do timer
+        self.harvest_in_progress = True  # Block new timer triggers
         self.send_secure_command('X', 0)
         time.sleep(1.0)
         
@@ -314,24 +314,24 @@ class AgriLineFollower(Node):
         except:
             pass
 
-        # --- FASE 1: DESCIDA (Mantendo o Watchdog acordado) ---
-        self.get_logger().info("⚙️ Descendo Sonda...")
+        # --- PHASE 1: DESCEND (Keeping Watchdog awake) ---
+        self.get_logger().info("⚙️ Descending Probe...")
         end_time = time.monotonic() + 15.5
         while time.monotonic() < end_time:
             self.send_secure_command('D', 0)
-            time.sleep(0.3)  # Alimenta o Watchdog do Arduino
+            time.sleep(0.3)  # Feed the Arduino Watchdog
             
         self.send_secure_command('X', 0)
 
-        # --- FASE 2: COLETA DE DADOS (Mantendo o Watchdog acordado no estado Parado) ---
-        self.get_logger().info("⏳ Coletando dados do solo (10s)...")
+        # --- PHASE 2: DATA COLLECTION (Keeping Watchdog awake while stopped) ---
+        self.get_logger().info("⏳ Collecting soil data (10s)...")
         end_time = time.monotonic() + 10.0
         while time.monotonic() < end_time:
-            self.send_secure_command('X', 0) # Envia "Pare" a cada 0.3s só pra Pi não ser desconectada
+            self.send_secure_command('X', 0) # Send "Stop" every 0.3s just so Pi won't disconnect
             time.sleep(0.3)
 
-        # --- FASE 3: SUBIDA (Mantendo o Watchdog acordado) ---
-        self.get_logger().info("⚙️ Recolhendo Sonda...")
+        # --- PHASE 3: ASCEND (Keeping Watchdog awake) ---
+        self.get_logger().info("⚙️ Retracting Probe...")
         end_time = time.monotonic() + 15.5
         while time.monotonic() < end_time:
             self.send_secure_command('U', 0)
@@ -339,8 +339,8 @@ class AgriLineFollower(Node):
             
         self.send_secure_command('X', 0)
 
-        # --- FASE 4: AVANÇO DE LIMPEZA ---
-        self.get_logger().info("🏎️ Avançando para limpar área de coleta...")
+        # --- PHASE 4: CLEARANCE ADVANCE ---
+        self.get_logger().info("🏎️ Advancing to clear collection area...")
         end_time = time.monotonic() + 4.0
         while time.monotonic() < end_time:
             self.send_secure_command('F', 20)
@@ -348,22 +348,22 @@ class AgriLineFollower(Node):
 
         self.send_secure_command('X', 0)
         
-        # Reseta estados para voltar ao seguidor de linha
+        # Reset states to return to line follower
         self.lost_frames       = 0
         self.prev_error        = 0.0          
         self.last_control_time = time.monotonic()
         self.last_line_time    = time.monotonic() 
         self.state             = "FOLLOWING"
-        self.harvest_in_progress = False # Libera o timer para a próxima contagem de 30s 30s
+        self.harvest_in_progress = False # Release the timer for the next 30s count
 
     def auto_probe_callback(self):
-        """Dispara a coleta automaticamente por tempo, se o robô estiver seguindo linha."""
+        """Trigger collection automatically by time, if robot is following line."""
         if self.state == "FOLLOWING" and not self.harvest_in_progress:
-            self.get_logger().info("⏱️ Intervalo de 30s atingido! Iniciando coleta automática...")
+            self.get_logger().info("⏱️ 30s interval reached! Starting auto collection...")
             self.state = "HARVESTING"
             self.harvest_routine()
         else:
-            self.get_logger().info("⚠️ 30s atingidos, mas o robô está ocupado ou em obstáculo. Pulando esta coleta.", 
+            self.get_logger().info("⚠️ 30s reached, but robot is busy or facing obstacle. Skipping this collection.", 
                                    throttle_duration_sec=5.0)
 
 def main(args=None):
@@ -375,7 +375,7 @@ def main(args=None):
         node.get_logger().info("Shutdown requested — stopping motors.")
         node.send_secure_command('X', 0)
     finally:
-        # Resolve o erro de Crash ao dar Ctrl+C
+        # Resolve crash error on Ctrl+C
         if rclpy.ok():
             node.destroy_node()
             rclpy.shutdown()
