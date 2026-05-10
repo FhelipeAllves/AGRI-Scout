@@ -3,7 +3,7 @@
 
 AGRI-Scout est un robot agricole différentiel autonome à quatre roues motrices, conçu pour la navigation dans les rangées de cultures et l'analyse de sol in-situ. Il combine la vision par ordinateur, un LiDAR, et une sonde à vis motorisée pour récolter des données pédologiques en temps réel.
 
-![AGRI-Scout](agri-scout-modif/documentation_latex/05_Rapport_Avancement/images/robot.jpeg)
+![AGRI-Scout](documentation_latex/05_Rapport_Avancement/images/robot.jpeg)
 
 🎥 **[Voir la démo vidéo sur YouTube](https://www.youtube.com/shorts/bMWXOjUjSsw)**
 
