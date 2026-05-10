@@ -5,6 +5,8 @@ AGRI-Scout est un robot agricole différentiel autonome à quatre roues motrices
 
 ![AGRI-Scout](agri-scout-modif/documentation_latex/05_Rapport_Avancement/images/robot.jpeg)
 
+🎥 **[Voir la démo vidéo sur YouTube](https://www.youtube.com/shorts/bMWXOjUjSsw)**
+
 ---
 
 ## 📑 Sommaire
