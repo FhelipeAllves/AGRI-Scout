@@ -1,10 +1,10 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.1.12)  10 MAY 2026 12:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.2.21)  10 MAY 2026 15:27
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**/home/pedrohaas/Documents/ENSTA/Projet/AGRI-Scout/documentation_latex/04_Developer_Manual/main.tex
-(/home/pedrohaas/Documents/ENSTA/Projet/AGRI-Scout/documentation_latex/04_Developer_Manual/main.tex
+**/home/luiz/Documents/AGRI-Scout/documentation_latex/04_Developer_Manual/main.tex
+(/home/luiz/Documents/AGRI-Scout/documentation_latex/04_Developer_Manual/main.tex
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
 (/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
@@ -38,9 +38,9 @@ Package: babel 2024/01/07 v24.1 The Babel package
  (/usr/share/texlive/texmf-dist/tex/generic/babel-french/french.ldf
 Language: french 2023-12-19 v3.5r French support from the babel system
 Package babel Info: Hyphen rules for 'acadian' set to \l@french
-(babel)             (\language59). Reported on input line 91.
+(babel)             (\language47). Reported on input line 91.
 Package babel Info: Hyphen rules for 'canadien' set to \l@french
-(babel)             (\language59). Reported on input line 92.
+(babel)             (\language47). Reported on input line 92.
 \FB@stdchar=\count197
 Package babel Info: Making : an active character on input line 420.
 Package babel Info: Making ; an active character on input line 421.
@@ -728,7 +728,7 @@ LaTeX Font Info:    Trying to load font information for U+rsfs on input line 32.
  (/usr/share/texlive/texmf-dist/tex/latex/jknapltx/ursfs.fd
 File: ursfs.fd 1998/03/24 rsfs font definition file (jk)
 )
-<images/Ensta-logotype-05-bleu-rvb.png, id=79, 1350.04375pt x 1010.77625pt>
+<images/Ensta-logotype-05-bleu-rvb.png, id=83, 1350.04375pt x 1010.77625pt>
 File: images/Ensta-logotype-05-bleu-rvb.png Graphic file (type png)
 <use images/Ensta-logotype-05-bleu-rvb.png>
 Package pdftex.def Info: images/Ensta-logotype-05-bleu-rvb.png  used on input line 32.
@@ -738,7 +738,7 @@ Overfull \vbox (87.20514pt too high) detected at line 32
  []
 
 ) (./main.toc
-LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 12.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 13.
  (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 ))
@@ -756,7 +756,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [1]
-<images/chassi.jpeg, id=116, 903.375pt x 1606.0pt>
+<images/chassi.jpeg, id=121, 903.375pt x 1606.0pt>
 File: images/chassi.jpeg Graphic file (type jpg)
 <use images/chassi.jpeg>
 Package pdftex.def Info: images/chassi.jpeg  used on input line 56.
@@ -770,22 +770,22 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [2 <./images/chassi.jpeg>]
-<images/chassi2.jpeg, id=126, 1606.0pt x 903.375pt>
+<images/chassi2.jpeg, id=131, 1606.0pt x 903.375pt>
 File: images/chassi2.jpeg Graphic file (type jpg)
 <use images/chassi2.jpeg>
 Package pdftex.def Info: images/chassi2.jpeg  used on input line 71.
 (pdftex.def)             Requested size: 298.75264pt x 168.0453pt.
-<images/Sup_motor.png, id=127, 1145.78062pt x 590.205pt>
+<images/Sup_motor.png, id=132, 1145.78062pt x 590.205pt>
 File: images/Sup_motor.png Graphic file (type png)
 <use images/Sup_motor.png>
 Package pdftex.def Info: images/Sup_motor.png  used on input line 83.
 (pdftex.def)             Requested size: 204.85802pt x 105.52086pt.
-<images/sup_inf.png, id=129, 1149.5447pt x 590.205pt>
+<images/sup_inf.png, id=134, 1149.5447pt x 590.205pt>
 File: images/sup_inf.png Graphic file (type png)
 <use images/sup_inf.png>
 Package pdftex.def Info: images/sup_inf.png  used on input line 88.
 (pdftex.def)             Requested size: 204.85802pt x 105.17863pt.
-<images/sup_sensor.png, id=130, 1150.2975pt x 584.1825pt>
+<images/sup_sensor.png, id=135, 1150.2975pt x 584.1825pt>
 File: images/sup_sensor.png Graphic file (type png)
 <use images/sup_sensor.png>
 Package pdftex.def Info: images/sup_sensor.png  used on input line 93.
@@ -799,22 +799,22 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [3 <./images/chassi2.jpeg> <./images/Sup_motor.png> <./images/sup_inf.png> <./images/sup_sensor.png>]
-<images/sonda.jpeg, id=140, 722.7pt x 715.67375pt>
+<images/sonda.jpeg, id=145, 722.7pt x 715.67375pt>
 File: images/sonda.jpeg Graphic file (type jpg)
 <use images/sonda.jpeg>
 Package pdftex.def Info: images/sonda.jpeg  used on input line 103.
 (pdftex.def)             Requested size: 213.39568pt x 211.31848pt.
-<images/bat_5.png, id=142, 1120.185pt x 576.65437pt>
+<images/bat_5.png, id=147, 1120.185pt x 576.65437pt>
 File: images/bat_5.png Graphic file (type png)
 <use images/bat_5.png>
 Package pdftex.def Info: images/bat_5.png  used on input line 115.
 (pdftex.def)             Requested size: 204.85802pt x 105.45631pt.
-<images/bat_22.png, id=143, 1145.02782pt x 589.4522pt>
+<images/bat_22.png, id=148, 1145.02782pt x 589.4522pt>
 File: images/bat_22.png Graphic file (type png)
 <use images/bat_22.png>
 Package pdftex.def Info: images/bat_22.png  used on input line 120.
 (pdftex.def)             Requested size: 204.85802pt x 105.45822pt.
-<images/elevation.png, id=145, 1148.03906pt x 581.92406pt>
+<images/elevation.png, id=150, 1148.03906pt x 581.92406pt>
 File: images/elevation.png Graphic file (type png)
 <use images/elevation.png>
 Package pdftex.def Info: images/elevation.png  used on input line 130.
@@ -828,12 +828,12 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [4 <./images/sonda.jpeg> <./images/bat_5.png> <./images/bat_22.png>]
-<images/imu_lidar.png, id=156, 1141.26375pt x 588.69937pt>
+<images/imu_lidar.png, id=161, 1141.26375pt x 588.69937pt>
 File: images/imu_lidar.png Graphic file (type png)
 <use images/imu_lidar.png>
 Package pdftex.def Info: images/imu_lidar.png  used on input line 139.
 (pdftex.def)             Requested size: 298.75264pt x 154.10022pt.
-<images/pi_ino.jpeg, id=158, 904.37875pt x 1234.6125pt>
+<images/pi_ino.jpeg, id=163, 904.37875pt x 1234.6125pt>
 File: images/pi_ino.jpeg Graphic file (type jpg)
 <use images/pi_ino.jpeg>
 Package pdftex.def Info: images/pi_ino.jpeg  used on input line 151.
@@ -847,7 +847,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [5 <./images/elevation.png> <./images/imu_lidar.png>]
-<images/IMG_LIDAR.jpeg, id=167, 3035.34pt x 3035.34pt>
+<images/IMG_LIDAR.jpeg, id=172, 3035.34pt x 3035.34pt>
 File: images/IMG_LIDAR.jpeg Graphic file (type jpg)
 <use images/IMG_LIDAR.jpeg>
 Package pdftex.def Info: images/IMG_LIDAR.jpeg  used on input line 161.
@@ -861,15 +861,15 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [6{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-ts1.enc} <./images/pi_ino.jpeg> <./images/IMG_LIDAR.jpeg>]
-<images/IMG_IMU.jpeg, id=176, 3035.34pt x 3035.34pt>
+<images/IMG_IMU.jpeg, id=181, 3035.34pt x 3035.34pt>
 File: images/IMG_IMU.jpeg Graphic file (type jpg)
 <use images/IMG_IMU.jpeg>
-Package pdftex.def Info: images/IMG_IMU.jpeg  used on input line 171.
+Package pdftex.def Info: images/IMG_IMU.jpeg  used on input line 179.
 (pdftex.def)             Requested size: 192.0548pt x 192.02406pt.
-<images/IMG_WEBCAM.jpeg, id=177, 3035.34pt x 3035.34pt>
+<images/IMG_WEBCAM.jpeg, id=182, 3035.34pt x 3035.34pt>
 File: images/IMG_WEBCAM.jpeg Graphic file (type jpg)
 <use images/IMG_WEBCAM.jpeg>
-Package pdftex.def Info: images/IMG_WEBCAM.jpeg  used on input line 181.
+Package pdftex.def Info: images/IMG_WEBCAM.jpeg  used on input line 189.
 (pdftex.def)             Requested size: 192.0548pt x 192.02406pt.
 
 
@@ -880,7 +880,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [7 <./images/IMG_IMU.jpeg>]
-Overfull \hbox (30.4242pt too wide) in paragraph at lines 232--233
+Overfull \hbox (30.4242pt too wide) in paragraph at lines 242--243
  [][] 
  []
 
@@ -893,7 +893,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 [8 <./images/IMG_WEBCAM.jpeg>]
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <14.4> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 246.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 256.
 
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -903,8 +903,13 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [9]
-Overfull \hbox (14.28517pt too wide) in paragraph at lines 261--262
+Overfull \hbox (14.28517pt too wide) in paragraph at lines 272--273
 \T1/cmr/m/n/12 tion d'obs-tacles. Il peut être lancé ma-nuel-le-ment à la place de \T1/cmtt/m/n/12 agri_line_follower.py\T1/cmr/m/n/12 . 
+ []
+
+
+Overfull \hbox (32.70757pt too wide) in paragraph at lines 288--289
+[]\T1/cmtt/m/n/12 calibration.launch.py \T1/cmr/m/n/12 ^^V lance uni-que-ment le LI-DAR et imu_artemis_parser.py
  []
 
 
@@ -928,21 +933,21 @@ LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: DF81BC1778EEE87ADA215A9DCB377284;3847.
+(rerunfilecheck)             Checksum: 772FD4233FD2DE7E6881B44487290898;4061.
  ) 
 Here is how much of TeX's memory you used:
- 29181 strings out of 474222
- 592688 string characters out of 5748733
- 1946975 words of memory out of 5000000
- 50952 multiletter control sequences out of 15000+600000
+ 29183 strings out of 474222
+ 592664 string characters out of 5748733
+ 1947975 words of memory out of 5000000
+ 50953 multiletter control sequences out of 15000+600000
  569772 words of font info for 63 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 84i,24n,87p,868b,1004s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,24n,87p,850b,1004s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1728.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfcc1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1440.pfb>
-Output written on main.pdf (12 pages, 7436717 bytes).
+Output written on main.pdf (12 pages, 7437673 bytes).
 PDF statistics:
- 261 PDF objects out of 1000 (max. 8388607)
- 202 compressed objects within 3 object streams
- 45 named destinations out of 1000 (max. 500000)
- 232 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 266 PDF objects out of 1000 (max. 8388607)
+ 207 compressed objects within 3 object streams
+ 46 named destinations out of 1000 (max. 500000)
+ 240 words of extra memory for PDF output out of 10000 (max. 10000000)
 

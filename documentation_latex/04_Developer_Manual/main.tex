@@ -26,7 +26,7 @@
 \pagestyle{fancy}     
 
 \fancyhf{}             
-\lhead{UE 3.4 - Projet \hfill \thepage}
+\lhead{UE 4.4 - Projet \hfill \thepage}
 
 \begin{document}
 
@@ -153,18 +153,26 @@ Le Raspberry Pi et l'Arduino ont été fixés sur le châssis supérieur du robo
     \label{fig:eletronica}
 \end{figure}
 
-\subsection{LIDAR RPLiDAR A1}
-Le LIDAR utilisé est un RPLiDAR A1 de Slamtec. Ce capteur effectue un balayage à 360° à l'aide d'un faisceau laser infrarouge, mesurant les distances aux obstacles environnants avec une précision millimétrique. Il est connecté au Raspberry Pi via USB et communique à un débit de 115200 bauds. Dans le système, il est principalement utilisé comme dispositif de sécurité : le nœud ROS 2 surveille en permanence le secteur frontal (±30°) et déclenche un arrêt d'urgence si un obstacle se trouve à moins de 20 cm. Le LIDAR est monté en hauteur sur le support d'élévation imprimé en 3D afin de maximiser son champ de vue.
+\subsection{LIDAR RPLiDAR}
+Le LIDAR utilisé est un RPLiDAR. Ce capteur effectue un balayage à 360° à l'aide d'un faisceau laser infrarouge, mesurant les distances aux obstacles environnants avec une précision millimétrique. Il est connecté au Raspberry Pi via USB et communique à un débit de 115200 bauds. Dans le système, il est principalement utilisé comme dispositif de sécurité : le nœud ROS 2 surveille en permanence le secteur frontal (±30°) et déclenche un arrêt d'urgence si un obstacle se trouve à moins de 20 cm. Le LIDAR est monté en hauteur sur le support d'élévation imprimé en 3D afin de maximiser son champ de vue.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.45\textwidth]{images/IMG_LIDAR.jpeg}
-    \caption{RPLiDAR A1 monté sur le robot.}
+    \caption{RPLiDAR monté sur le robot.}
     \label{fig:lidar_photo}
 \end{figure}
 
 \subsection{Centrale Inertielle (IMU)}
-La centrale inertielle (IMU) est un module SparkFun OpenLog Artemis, qui intègre un accéléromètre 3 axes et un gyroscope 3 axes. Elle est fixée sur le même support rotatif que le LIDAR, permettant d'aligner les référentiels des deux capteurs. Bien que l'IMU ne soit pas encore pleinement exploitée dans la version actuelle du logiciel, elle est intégrée à l'architecture matérielle afin de permettre de futures améliorations, notamment pour la détection d'inclinaison du terrain ou la correction de trajectoire.
+Pour le suivi de l'orientation, nous utilisons la centrale inertielle SparkFun OpenLog Artemis. L'utilisation du Digital Motion Processor (DMP) intégré est
+ ici cruciale : il traite les signaux bruts des 9 axes pour générer une estimation d'orientation stable, minimisant ainsi la dérive (drift) du yaw grâce au
+référencement magnétique.
+
+La fixation mécanique de l'IMU sur le support rotatif du LIDAR permet une coïncidence parfaite des axes de mesure. En raison de l'utilisation complète des 
+interfaces USB de la Raspberry Pi 4, l'intégration système a été optimisée en utilisant la communication UART via les broches GPIO. Ce choix permet de maintenir 
+une bande passante dédiée à la télémétrie inertielle sans interférer avec les transferts de données massifs des autres capteurs USB.
+
+
 
 \begin{figure}[H]
     \centering
@@ -183,7 +191,9 @@ La webcam est une caméra USB standard, utilisée comme capteur de vision princi
     \label{fig:webcam_photo}
 \end{figure}
 
-Il est important de noter que la connexion électrique entre l'Arduino, os ESC et le pont en H peut être vérifiée dans le code du fichier \texttt{main\_firmware.ino}. Après avoir accédé au Raspberry Pi en suivant les instructions du Quick Start Guide, le code est disponible dans le répertoire :
+\subsection{Connexions Arduino et actionneurs}
+
+Il est important de noter que la connexion électrique entre l'Arduino, les ESC et le pont en H peut être vérifiée dans le code du fichier \texttt{main\_firmware.ino}. Après avoir accédé au Raspberry Pi en suivant les instructions du Quick Start Guide, le code est disponible dans le répertoire :
 \begin{verbatim}
 ~/AGRI-Scout_Modif/arduino_firmware/main_firmware/main_firmware.ino
 \end{verbatim}
@@ -244,7 +254,8 @@ Le logiciel du robot est organisé autour d'un nœud ROS 2 central écrit en Pyt
 \end{itemize}
 
 \subsection{Nœud Principal : \texttt{agri\_line\_follower.py}}
-Ce nœud agit comme le « cerveau » du robot en mission autonome. Il intègre trois flux asynchrones : la caméra V4L2 (topic \texttt{/image\_raw}), le scanner LIDAR (topic \texttt{/scan}) et la liaison série UART vers l'Arduino. La machine à états interne comporte deux modes principaux :
+Ce nœud agit comme le « cerveau » du robot en mission autonome. Il intègre trois flux asynchrones : la caméra V4L2 (topic \texttt{/image\_raw}),
+ le scanner LIDAR (topic \texttt{/scan}) et la liaison USB vers l'Arduino. La machine à états interne comporte deux modes principaux :
 \begin{itemize}
     \item FOLLOWING : suivi de ligne blanche par vision, avec un correcteur PD pour le guidage latéral.
     \item HARVESTING : séquence automatique de descente, collecte de données et remontée de la sonde.
@@ -272,8 +283,9 @@ Utilitaire interactif permettant de calibrer mécaniquement le rail de la sonde.
 \subsection{Fichiers de Lancement ROS 2}
 Deux fichiers de lancement (launch files) orchestrent le démarrage du système :
 \begin{itemize}
-    \item \texttt{demo.launch.py} — lance simultanément le nœud de caméra V4L2, le nœud LIDAR RPLiDAR et le nœud de suivi de ligne (\texttt{agri\_line\_follower.py}).
-    \item \texttt{calibration.launch.py} — lance uniquement la caméra pour les procédures de calibration de l'optique.
+    \item \texttt{demo.launch.py} — lance simultanément le nœud de caméra V4L2, le nœud LIDAR RPLiDAR et le nœud de suivi de ligne 
+    (\texttt{agri\_line\_follower.py}).
+    \item \texttt{calibration.launch.py} — lance uniquement le LIDAR et imu\_artemis\_parser.py pour vérifier le fonctionnement.
 \end{itemize}
 
 \subsection{Firmware Arduino (\texttt{main\_firmware.ino})}

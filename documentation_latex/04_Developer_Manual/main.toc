@@ -5,9 +5,10 @@
 \contentsline {subsection}{\numberline {2.2}Conception et fabrication de la sonde à vis}{3}{subsection.2.2}%
 \contentsline {subsection}{\numberline {2.3}Conception et fabrication des autres supports}{4}{subsection.2.3}%
 \contentsline {section}{\numberline {3}Architecture Électronique}{5}{section.3}%
-\contentsline {subsection}{\numberline {3.1}LIDAR RPLiDAR A1}{6}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.1}LIDAR RPLiDAR}{6}{subsection.3.1}%
 \contentsline {subsection}{\numberline {3.2}Centrale Inertielle (IMU)}{7}{subsection.3.2}%
 \contentsline {subsection}{\numberline {3.3}Webcam USB}{7}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Connexions Arduino et actionneurs}{8}{subsection.3.4}%
 \contentsline {section}{\numberline {4}Architecture Logicielle}{9}{section.4}%
 \contentsline {subsection}{\numberline {4.1}Nœud Principal : \texttt {agri\_line\_follower.py}}{9}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}Nœud de Démonstration : \texttt {agri\_demo\_hunter.py}}{10}{subsection.4.2}%

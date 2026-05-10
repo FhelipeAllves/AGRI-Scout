@@ -12,7 +12,8 @@ La confrontation avec la réalité matérielle du projet a révélé plusieurs o
 
 \subsubsection{Instabilité Électrique}
 
-Sous forte charge logicielle, la Raspberry Pi 4 consomme jusqu'à 5W en pointe. Le régulateur Traco Power, partagé avec les ESC des moteurs, ne pouvait pas absorber les pics de courant lors des accélérations, provoquant des chutes de tension et des redémarrages intempestifs (brown-outs) rendant toute mission autonome impossible.
+Sous forte charge logicielle, la carte Raspberry Pi 4 seule consomme environ 7W en pointe. Cependant, avec l'activation des périphériques USB (caméra, LiDAR, pont de communication), la consommation globale exigée au système d'alimentation peut facilement atteindre des pics de 12W à 15W.
+ Le régulateur Traco Power, partagé avec les ESC des moteurs, ne pouvait pas absorber les pics de courant lors des accélérations, provoquant des chutes de tension et des redémarrages intempestifs (brown-outs) rendant toute mission autonome impossible.
 
 \subsubsection{Problèmes de Communication Série}
 

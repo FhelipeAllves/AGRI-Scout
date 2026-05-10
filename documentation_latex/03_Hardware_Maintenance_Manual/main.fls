@@ -1,9 +1,9 @@
-PWD /home/pedrohaas/Documents/ENSTA/Projet/AGRI-Scout/documentation_latex/03_Hardware_Maintenance_Manual
+PWD /home/luiz/Documents/AGRI-Scout/documentation_latex/03_Hardware_Maintenance_Manual
 INPUT /etc/texmf/web2c/texmf.cnf
 INPUT /usr/share/texmf/web2c/texmf.cnf
 INPUT /usr/share/texlive/texmf-dist/web2c/texmf.cnf
 INPUT /var/lib/texmf/web2c/pdftex/pdflatex.fmt
-INPUT /home/pedrohaas/Documents/ENSTA/Projet/AGRI-Scout/documentation_latex/03_Hardware_Maintenance_Manual/main.tex
+INPUT /home/luiz/Documents/AGRI-Scout/documentation_latex/03_Hardware_Maintenance_Manual/main.tex
 OUTPUT main.log
 INPUT /usr/share/texlive/texmf-dist/tex/latex/base/article.cls
 INPUT /usr/share/texlive/texmf-dist/tex/latex/base/article.cls

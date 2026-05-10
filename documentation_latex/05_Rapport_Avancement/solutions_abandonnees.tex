@@ -11,8 +11,8 @@ L'exécution de modèles YOLO sur la Raspberry Pi 4 n'atteignait que 2--3 images
 \subsection{micro-ROS sur Arduino}
 La bibliothèque micro-ROS aurait permis d'intégrer l'Arduino directement dans le graphe de communication ROS 2. Cependant, les ressources limitées de l'Arduino Uno (2~Ko de RAM, 32~Ko de Flash) causaient des instabilités mémoire lors de l'exécution simultanée de la sécurité ultrasonique et du client micro-ROS. L'équipe a préféré maintenir un protocole propriétaire léger sur l'Arduino, la logique ROS 2 restant entièrement côté Raspberry Pi.
 
-\subsection{IMU BNO055}
-L'IMU BNO055 avait été envisagée pour corriger les dérives de trajectoire dues au glissement (skid-steering). En pratique, le champ magnétique des moteurs perturbait la boussole interne, rendant les données de cap peu fiables. L'odométrie visuelle par centroïde de ligne, couplée au LiDAR, a suffi pour les missions de suivi de rang.
+% \subsection{IMU BNO055}
+% L'IMU BNO055 avait été envisagée pour corriger les dérives de trajectoire dues au glissement (skid-steering). En pratique, le champ magnétique des moteurs perturbait la boussole interne, rendant les données de cap peu fiables. L'odométrie visuelle par centroïde de ligne, couplée au LiDAR, a suffi pour les missions de suivi de rang.
 
 \subsection{Navigation Globale avec Nav2}
 La stack Nav2 de ROS 2, qui inclut des planificateurs de trajectoire de type A*, a été étudiée. Son intégration exige une carte de l'environnement (via SLAM) et un système de localisation robuste, deux éléments non disponibles dans le périmètre du projet. Le contrôleur PD réactif, bien que plus simple, a été suffisant pour les missions en rang droit.
