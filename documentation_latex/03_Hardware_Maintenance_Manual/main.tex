@@ -98,7 +98,7 @@ Moteur sonde & NEMA 17 (moteur pas à pas) & 200 pas/tour, contrôlé via L298N 
 Pont en H (sonde) & L298N & Pins 4, 5, 6, 7 de l'Arduino \\
 LIDAR & Slamtec RPLiDAR A1 & USB, 115200 bauds, \texttt{/dev/ttyUSB0} \\
 Caméra & Webcam USB V4L2 & 320×240 MJPEG, \texttt{/dev/video0} \\
-IMU & SparkFun OpenLog Artemis & I2C, non exploité en mission v1 \\
+IMU & SparkFun OpenLog Artemis & Communication UART \\
 Capteur sol & Capteur NPK 8 paramètres & RS485/Modbus RTU, \texttt{/dev/ttyUSB1} \\
 Batterie moteurs & LiPo 5000 mAh (11.1 V, 3S) & Circuit de puissance des roues \\
 Batterie sonde & LiPo 2200 mAh (11.1 V, 3S) & Alimentation pont en H L298N \\
@@ -255,7 +255,7 @@ Pour déposer le LIDAR :
     \label{fig:imu_hw}
 \end{figure}
 
-L'IMU est connectée au Raspberry Pi via le bus I2C (SDA/SCL + GND + 3.3 V). Pour la remplacer, débranchez les 4 fils dupont et dévissez le module de son support.
+L'IMU est connectée au Raspberry Pi via communication UART (Serial). Pour la remplacer, débranchez les 4 fils dupont et dévissez le module de son support.
 
 \subsection{Webcam USB}
 
